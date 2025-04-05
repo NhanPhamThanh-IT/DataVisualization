@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -21,31 +21,22 @@
             font-size: 24px;
         }
 
-        .tabs {
+        .container {
             display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            background: #f1f1f1;
-            border: 1px solid #ccc;
-        }
-
-        .tab.active {
-            background: #007bff;
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
         }
 
-        .tab-content.active {
-            display: block;
+        .filters {
+            margin-bottom: 20px;
+        }
+
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 80%;
         }
 
         .chart {
@@ -54,7 +45,6 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             position: relative;
-            margin-top: 20px;
         }
 
         .tooltip {
@@ -67,28 +57,23 @@
             visibility: hidden;
         }
 
+        footer {
+            margin-top: 20px;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+        }
+
         svg {
-            width: 1000px;
-            height: 400px;
+            width: 100%;
+            height: 300px;
         }
     </style>
 </head>
 
 <body>
     <header>Heart Disease Data Visualization</header>
-    <div class="tabs">
-        <div class="tab active" data-target="age-distribution">Age Distribution</div>
-        <div class="tab" data-target="gender-disease">Gender & Disease</div>
-        <div class="tab" data-target="smoking-disease">Smoking & Disease</div>
-        <div class="tab" data-target="exercise-disease">Exercise & Disease</div>
-        <div class="tab" data-target="cholesterol-boxplot">Cholesterol</div>
-        <div class="tab" data-target="bmi-violin">BMI</div>
-        <div class="tab" data-target="family-history">Family heart disease</div>
-        <div class="tab" data-target="cholesterol-gender">Cholesterol between Genders</div>
-    </div>
-
-    <div id="age-distribution" class="tab-content active">
-        <h2>Age Distribution</h2>
+    <div class="container">
         <div class="filters">
             <label for="age-group">Age Group:</label>
             <select id="age-group">
@@ -98,11 +83,16 @@
                 <option value="above-60">Above 60</option>
             </select>
         </div>
-        <div class="chart" id="chart-age"><svg></svg>
-            <div class="tooltip"></div>
+        <div class="charts">
+            <div class="chart" id="chart-age"><svg></svg>
+                <div class="tooltip"></div>
+            </div>
+            <div class="chart" id="chart-gender"><svg></svg>
+                <div class="tooltip"></div>
+            </div>
         </div>
     </div>
-
+    <footer>Developed by Your Team</footer>
     <script>
         d3.csv("project_heart_disease.csv").then(function (data) {
             console.log(data);
@@ -113,33 +103,14 @@
                 const ageData = Array.from(ageGroups, ([age, count]) => ({ age, count }));
                 const svg = d3.select("#chart-age svg");
                 svg.selectAll("*").remove();
-                const margin = { top: 20, right: 20, bottom: 100, left: 60 },
-                    width = 900 - margin.left - margin.right,
-                    height = 350 - margin.top - margin.bottom;
-                const x = d3.scaleBand().domain(ageData.map(d => d.age)).range([0, width]).padding(0.3);
+                const margin = { top: 20, right: 20, bottom: 50, left: 50 },
+                    width = 400 - margin.left - margin.right,
+                    height = 300 - margin.top - margin.bottom;
+                const x = d3.scaleBand().domain(ageData.map(d => d.age)).range([0, width]).padding(0.2);
                 const y = d3.scaleLinear().domain([0, d3.max(ageData, d => d.count)]).range([height, 0]);
                 const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-                g.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x))
-                    .selectAll("text")
-                    .attr("transform", "rotate(-45)")
-                    .style("text-anchor", "end");
-
+                g.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
                 g.append("g").call(d3.axisLeft(y));
-
-                g.append("text")
-                    .attr("x", width / 2)
-                    .attr("y", height + 50)
-                    .attr("text-anchor", "middle")
-                    .text("Age Groups");
-
-                g.append("text")
-                    .attr("transform", "rotate(-90)")
-                    .attr("x", -height / 2)
-                    .attr("y", -40)
-                    .attr("text-anchor", "middle")
-                    .text("Number of Patients");
-
                 g.selectAll(".bar").data(ageData).enter().append("rect")
                     .attr("x", d => x(d.age))
                     .attr("y", d => y(d.count))
@@ -174,17 +145,7 @@
             updateChart();
         });
     </script>
-
-    <script>
-        document.querySelectorAll(".tab").forEach(tab => {
-            tab.addEventListener("click", function () {
-                document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-                document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
-                this.classList.add("active");
-                document.getElementById(this.dataset.target).classList.add("active");
-            });
-        });
-    </script>
 </body>
 
 </html>
+-->
