@@ -1,0 +1,151 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .filters {
+            margin-bottom: 20px;
+        }
+
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 80%;
+        }
+
+        .chart {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: white;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        footer {
+            margin-top: 20px;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+        }
+
+        svg {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>Heart Disease Data Visualization</header>
+    <div class="container">
+        <div class="filters">
+            <label for="age-group">Age Group:</label>
+            <select id="age-group">
+                <option value="all">All</option>
+                <option value="under-40">Under 40</option>
+                <option value="40-60">40-60</option>
+                <option value="above-60">Above 60</option>
+            </select>
+        </div>
+        <div class="charts">
+            <div class="chart" id="chart-age"><svg></svg>
+                <div class="tooltip"></div>
+            </div>
+            <div class="chart" id="chart-gender"><svg></svg>
+                <div class="tooltip"></div>
+            </div>
+        </div>
+    </div>
+    <footer>Developed by Your Team</footer>
+    <script>
+        d3.csv("project_heart_disease.csv").then(function (data) {
+            console.log(data);
+            const tooltip = d3.selectAll(".tooltip");
+
+            function drawBarChartAge(filteredData) {
+                const ageGroups = d3.rollup(filteredData, v => v.length, d => d.Age);
+                const ageData = Array.from(ageGroups, ([age, count]) => ({ age, count }));
+                const svg = d3.select("#chart-age svg");
+                svg.selectAll("*").remove();
+                const margin = { top: 20, right: 20, bottom: 50, left: 50 },
+                    width = 400 - margin.left - margin.right,
+                    height = 300 - margin.top - margin.bottom;
+                const x = d3.scaleBand().domain(ageData.map(d => d.age)).range([0, width]).padding(0.2);
+                const y = d3.scaleLinear().domain([0, d3.max(ageData, d => d.count)]).range([height, 0]);
+                const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+                g.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+                g.append("g").call(d3.axisLeft(y));
+                g.selectAll(".bar").data(ageData).enter().append("rect")
+                    .attr("x", d => x(d.age))
+                    .attr("y", d => y(d.count))
+                    .attr("width", x.bandwidth())
+                    .attr("height", d => height - y(d.count))
+                    .attr("fill", "steelblue")
+                    .on("mouseover", function (event, d) {
+                        tooltip.style("visibility", "visible").text(`Age: ${d.age}, Count: ${d.count}`);
+                    })
+                    .on("mousemove", function (event) {
+                        tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");
+                    })
+                    .on("mouseout", function () {
+                        tooltip.style("visibility", "hidden");
+                    });
+            }
+
+            function updateChart() {
+                const selectedAgeGroup = document.getElementById("age-group").value;
+                let filteredData = data;
+                if (selectedAgeGroup === "under-40") {
+                    filteredData = data.filter(d => d.Age < 40);
+                } else if (selectedAgeGroup === "40-60") {
+                    filteredData = data.filter(d => d.Age >= 40 && d.Age <= 60);
+                } else if (selectedAgeGroup === "above-60") {
+                    filteredData = data.filter(d => d.Age > 60);
+                }
+                drawBarChartAge(filteredData);
+            }
+
+            document.getElementById("age-group").addEventListener("change", updateChart);
+            updateChart();
+        });
+    </script>
+</body>
+
+</html>
+-->
