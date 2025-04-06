@@ -45,7 +45,7 @@ function renderGenderPieChart() {
 
     const color = d3.scaleOrdinal()
       .domain(["Yes", "No"])
-      .range(["#e41a1c", "#377eb8"]);
+      .range(["#dd5182", "#ffa600"]);
 
     // Add tooltip div
     const tooltip = d3.select("body").append("div")

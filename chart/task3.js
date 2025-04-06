@@ -5,16 +5,26 @@ function renderSmokingChart() {
 
     // Clean and process data
     data.forEach(d => {
-      d["Smoking Status"] = d["Smoking"].trim();
+      d["Smoking"] = d["Smoking"].trim();
       d["Heart Disease Status"] = d["Heart Disease Status"].trim();
     });
 
     // Group data by smoking status and disease status
-    const groupedData = d3.group(data, d => d["Smoking Status"]);
+    const cleanData = data.filter(d => 
+      d["Smoking"] && 
+      d["Heart Disease Status"] && 
+      ["Yes", "No"].includes(d["Heart Disease Status"].trim()) &&
+      d["Smoking"] !== "Unknown"
+    ).map(d => ({
+      smoking: d["Smoking"].trim(),
+      heartDisease: d["Heart Disease Status"].trim()
+    }));
+
+    const groupedData = d3.group(cleanData, d => d.smoking);
     const chartData = Array.from(groupedData, ([status, group]) => ({
       smokingStatus: status,
-      yes: group.filter(d => d["Heart Disease Status"] === "Yes").length,
-      no: group.filter(d => d["Heart Disease Status"] === "No").length
+      yes: group.filter(d => d.heartDisease === "Yes").length,
+      no: group.filter(d => d.heartDisease === "No").length
     }));
 
     // Chart dimensions
@@ -48,7 +58,7 @@ function renderSmokingChart() {
     // Color scale
     const color = d3.scaleOrdinal()
       .domain(["yes", "no"])
-      .range(["#e41a1c", "#377eb8"]);
+      .range(["#003f5c", "#58508d"]);
 
     // Tooltip
     const tooltip = d3.select("body").append("div")
