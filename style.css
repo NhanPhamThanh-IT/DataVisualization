@@ -3,10 +3,12 @@
     height: 500px;
     margin: 20px 0;
 }
+
 .tooltip {
     z-index: 10;
     font-size: 13px;
-  }
+}
+
 .tab-content {
     display: none;
 }
@@ -14,6 +16,9 @@
 .tab-content.active {
     display: block;
 }
+
+/* Body style */
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -21,30 +26,47 @@ body {
     text-align: center;
 }
 
+/* Header style */
+
 header {
-    background: #007bff;
+    background-color: #4CAF50;
     color: white;
-    padding: 20px;
-    font-size: 24px;
+    padding: 15px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
 }
+
+/* Tab Navigation Style */
 
 .tabs {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    margin-top: 10px;
+    background-color: #333;
+    padding: 10px 0;
 }
 
 .tab {
-    padding: 10px 20px;
+    padding: 10px 10px;
+    margin: 5px;
+    background-color: #555;
+    color: white;
     cursor: pointer;
-    background: #f1f1f1;
-    border: 1px solid #ccc;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.tab:hover {
+    background-color: #777;
 }
 
 .tab.active {
-    background: #007bff;
+    background: #4CAF50;
     color: white;
 }
+
+/* Tab Content Style */
 
 .tab-content {
     display: none;
@@ -78,8 +100,9 @@ svg {
     width: 1000px;
     height: 400px;
 }
+
 #chart-gender-disease {
     display: flex;
     justify-content: center;
     margin-top: 20px;
-  }
+}
