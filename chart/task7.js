@@ -1,17 +1,17 @@
+import { CSV_FILE_PATH, TASK_7 } from "../constants/index.js";
+import { addTooltip } from "../utils/index.js";
+
 function loadData() {
-  return d3.csv("../project_heart_disease.csv").then(data => {
+  return d3.csv(CSV_FILE_PATH).then(data => {
     const cleanData = data.filter(d =>
-      d["Family Heart Disease"] &&
-      d["Heart Disease Status"] &&
-      ["Yes", "No"].includes(d["Heart Disease Status"].trim())
+      d[TASK_7.ATTRIBUTES.src] &&
+      d[TASK_7.ATTRIBUTES.dest] &&
+      TASK_7.STATUS_VALUES.includes(d[TASK_7.ATTRIBUTES.dest].trim())
     ).map(d => ({
-      familyHistory: d["Family Heart Disease"].trim(),
-      heartDisease: d["Heart Disease Status"].trim()
+      familyHistory: d[TASK_7.ATTRIBUTES.src].trim(),
+      heartDisease: d[TASK_7.ATTRIBUTES.dest].trim()
     }));
-
-    // Aggregate data
     const grouped = d3.group(cleanData, d => d.familyHistory);
-
     return Array.from(grouped, ([history, group]) => {
       const total = group.length;
       const withDisease = group.filter(d => d.heartDisease === "Yes").length;
@@ -99,14 +99,14 @@ function addAxes(svg, x, y, width, height) {
     .call(g => g.select(".domain").remove());
 }
 
-function addTitles(svg, width, height, margin) {
+function addTitles(svg, width, height, margin, chartTitles) {
   svg.append("text")
     .attr("x", width / 2)
     .attr("y", height + margin.bottom - 10)
     .attr("text-anchor", "middle")
     .style("font-size", "14px")
     .style("font-weight", "bold")
-    .text("Family History");
+    .text(chartTitles.xAxisTitle);
 
   svg.append("text")
     .attr("transform", "rotate(-90)")
@@ -115,7 +115,7 @@ function addTitles(svg, width, height, margin) {
     .attr("text-anchor", "middle")
     .style("font-size", "14px")
     .style("font-weight", "bold")
-    .text("Number of Patients");
+    .text(chartTitles.yAxisTitle);
 
   svg.append("text")
     .attr("x", width / 2)
@@ -123,7 +123,7 @@ function addTitles(svg, width, height, margin) {
     .attr("text-anchor", "middle")
     .style("font-size", "16px")
     .style("font-weight", "bold")
-    .text("Distribution of Heart Disease by Family History");
+    .text(chartTitles.chartTitle);
 }
 
 function addLegend(svg, width) {
@@ -145,17 +145,6 @@ function addLegend(svg, width) {
       .style("font-size", "12px")
       .text(text);
   });
-}
-
-function addTooltip() {
-  return d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0)
-    .style("position", "absolute")
-    .style("background-color", "white")
-    .style("padding", "10px")
-    .style("border-radius", "5px")
-    .style("box-shadow", "0 0 10px rgba(0,0,0,0.1)");
 }
 
 function handleMouseEvents(barGroups, tooltip) {
@@ -199,19 +188,11 @@ function renderFamilyHistoryChart() {
   loadData().then(chartData => {
     const container = d3.select("#chart-family-history");
     container.selectAll("svg").remove();
-
-    // Chart dimensions
     const margin = { top: 40, right: 160, bottom: 60, left: 60 },
       width = 900 - margin.left - margin.right,
       height = 400 - margin.top - margin.bottom;
-
-    // Create SVG
     const svg = createSVG(container, width, height, margin);
-
-    // Create scales
     const { x, y, color } = createScales(chartData, width, height);
-
-    // Add grid lines
     svg.append("g")
       .attr("class", "grid")
       .call(d3.axisLeft(y)
@@ -220,44 +201,27 @@ function renderFamilyHistoryChart() {
       )
       .style("stroke-dasharray", "2,2")
       .style("opacity", 0.1);
-
-    // Create stacked data
     const stack = d3.stack()
-      .keys(["withDisease", "withoutDisease"])
+      .keys(["withoutDisease", "withDisease"])
       .order(d3.stackOrderNone)
       .offset(d3.stackOffsetNone);
-
     const stackedData = stack(chartData.map(d => ({
       familyHistory: d.familyHistory,
       withDisease: d.withDisease,
       withoutDisease: d.withoutDisease
     })));
-
-    // Draw bars
     drawBars(svg, stackedData, x, y, color);
-
-    // Add value labels
     addValueLabels(svg.selectAll("g.layer"), x, y);
-
-    // Add axes
     addAxes(svg, x, y, width, height);
-
-    // Add titles
-    addTitles(svg, width, height, margin);
-
-    // Add legend
+    addTitles(svg, width, height, margin, TASK_7.TITLES);
     addLegend(svg, width);
-
-    // Add tooltip
     const tooltip = addTooltip();
-
-    // Add mouse events
     handleMouseEvents(svg.selectAll("g.layer"), tooltip);
   });
 }
 
-if (document.querySelector("#family-history").classList.contains("active")) {
+if (document.querySelector(`#${TASK_7.DATA_TARGET}`).classList.contains("active")) {
   renderFamilyHistoryChart();
 }
-document.querySelector("[data-target='family-history']")
+document.querySelector(`[data-target=${TASK_7.DATA_TARGET}]`)
   .addEventListener("click", renderFamilyHistoryChart);
