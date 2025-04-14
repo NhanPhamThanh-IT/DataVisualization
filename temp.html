@@ -1,151 +1,154 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heart Disease Dashboard</title>
+    <title>Reusable Stacked Bar Chart with Tooltip</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            text-align: center;
+        .bar {
+            shape-rendering: crispEdges;
         }
 
-        header {
-            background: #007bff;
-            color: white;
-            padding: 20px;
-            font-size: 24px;
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
         }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+        .axis text {
+            font-size: 10px;
         }
 
-        .filters {
-            margin-bottom: 20px;
+        .legend rect {
+            stroke-width: 1;
+            stroke: rgba(0, 0, 0, 0.2);
         }
 
-        .charts {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            width: 80%;
-        }
-
-        .chart {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: relative;
+        .legend text {
+            font-size: 12px;
         }
 
         .tooltip {
             position: absolute;
+            padding: 5px 10px;
             background: white;
-            padding: 5px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            font-size: 12px;
             pointer-events: none;
-            visibility: hidden;
-        }
-
-        footer {
-            margin-top: 20px;
-            padding: 10px;
-            background: #007bff;
-            color: white;
-        }
-
-        svg {
-            width: 100%;
-            height: 300px;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
     </style>
 </head>
-
 <body>
-    <header>Heart Disease Data Visualization</header>
-    <div class="container">
-        <div class="filters">
-            <label for="age-group">Age Group:</label>
-            <select id="age-group">
-                <option value="all">All</option>
-                <option value="under-40">Under 40</option>
-                <option value="40-60">40-60</option>
-                <option value="above-60">Above 60</option>
-            </select>
-        </div>
-        <div class="charts">
-            <div class="chart" id="chart-age"><svg></svg>
-                <div class="tooltip"></div>
-            </div>
-            <div class="chart" id="chart-gender"><svg></svg>
-                <div class="tooltip"></div>
-            </div>
-        </div>
-    </div>
-    <footer>Developed by Your Team</footer>
-    <script>
-        d3.csv("project_heart_disease.csv").then(function (data) {
-            console.log(data);
-            const tooltip = d3.selectAll(".tooltip");
 
-            function drawBarChartAge(filteredData) {
-                const ageGroups = d3.rollup(filteredData, v => v.length, d => d.Age);
-                const ageData = Array.from(ageGroups, ([age, count]) => ({ age, count }));
-                const svg = d3.select("#chart-age svg");
-                svg.selectAll("*").remove();
-                const margin = { top: 20, right: 20, bottom: 50, left: 50 },
-                    width = 400 - margin.left - margin.right,
-                    height = 300 - margin.top - margin.bottom;
-                const x = d3.scaleBand().domain(ageData.map(d => d.age)).range([0, width]).padding(0.2);
-                const y = d3.scaleLinear().domain([0, d3.max(ageData, d => d.count)]).range([height, 0]);
-                const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-                g.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
-                g.append("g").call(d3.axisLeft(y));
-                g.selectAll(".bar").data(ageData).enter().append("rect")
-                    .attr("x", d => x(d.age))
-                    .attr("y", d => y(d.count))
-                    .attr("width", x.bandwidth())
-                    .attr("height", d => height - y(d.count))
-                    .attr("fill", "steelblue")
-                    .on("mouseover", function (event, d) {
-                        tooltip.style("visibility", "visible").text(`Age: ${d.age}, Count: ${d.count}`);
-                    })
-                    .on("mousemove", function (event) {
-                        tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");
-                    })
-                    .on("mouseout", function () {
-                        tooltip.style("visibility", "hidden");
-                    });
-            }
+<svg id="stacked-bar-chart"></svg>
+<div class="tooltip" id="tooltip"></div>
 
-            function updateChart() {
-                const selectedAgeGroup = document.getElementById("age-group").value;
-                let filteredData = data;
-                if (selectedAgeGroup === "under-40") {
-                    filteredData = data.filter(d => d.Age < 40);
-                } else if (selectedAgeGroup === "40-60") {
-                    filteredData = data.filter(d => d.Age >= 40 && d.Age <= 60);
-                } else if (selectedAgeGroup === "above-60") {
-                    filteredData = data.filter(d => d.Age > 60);
-                }
-                drawBarChartAge(filteredData);
-            }
+<script>
+    function drawStackedBarChart({ svgId, data, keys, width = 600, height = 400, margin = { top: 20, right: 30, bottom: 40, left: 50 } }) {
+        const svg = d3.select(`#${svgId}`)
+            .attr("width", width)
+            .attr("height", height)
+            .html("") // clear existing content
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
 
-            document.getElementById("age-group").addEventListener("change", updateChart);
-            updateChart();
-        });
-    </script>
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        const stack = d3.stack().keys(keys);
+        const stackedData = stack(data);
+
+        const xScale = d3.scaleBand()
+            .domain(data.map(d => d.category))
+            .range([0, innerWidth])
+            .padding(0.2);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(stackedData[stackedData.length - 1], d => d[1])])
+            .nice()
+            .range([innerHeight, 0]);
+
+        const colorScale = d3.scaleOrdinal()
+            .domain(keys)
+            .range(d3.schemeCategory10);
+
+        // Tooltip
+        const tooltip = d3.select("#tooltip");
+
+        // Axes
+        svg.append("g")
+            .attr("transform", `translate(0,${innerHeight})`)
+            .call(d3.axisBottom(xScale));
+
+        svg.append("g")
+            .call(d3.axisLeft(yScale));
+
+        // Bars
+        const groups = svg.selectAll("g.layer")
+            .data(stackedData)
+            .enter().append("g")
+            .attr("class", "layer")
+            .style("fill", d => colorScale(d.key));
+
+        groups.selectAll("rect")
+            .data(d => d.map(p => ({ ...p, key: d.key })))
+            .enter().append("rect")
+            .attr("x", d => xScale(d.data.category))
+            .attr("y", d => yScale(d[1]))
+            .attr("height", d => yScale(d[0]) - yScale(d[1]))
+            .attr("width", xScale.bandwidth())
+            .on("mouseover", (event, d) => {
+                tooltip.transition().style("opacity", 1);
+                tooltip.html(`Category: <b>${d.data.category}</b><br>${d.key}: <b>${d.data[d.key]}</b>`);
+            })
+            .on("mousemove", (event) => {
+                tooltip.style("left", (event.pageX + 10) + "px")
+                       .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.transition().style("opacity", 0);
+            });
+
+        // Legend
+        const legend = svg.selectAll(".legend")
+            .data(keys.slice().reverse())
+            .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", (d, i) => `translate(0,${i * 20})`);
+
+        legend.append("rect")
+            .attr("x", innerWidth - 18)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", colorScale);
+
+        legend.append("text")
+            .attr("x", innerWidth - 24)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(d => d);
+    }
+
+    // Example usage
+    const data = [
+        { category: "A", value1: 10, value2: 20, value3: 15 },
+        { category: "B", value1: 15, value2: 25, value3: 10 },
+        { category: "C", value1: 20, value2: 10, value3: 25 }
+    ];
+
+    const keys = ["value1", "value2", "value3"];
+
+    drawStackedBarChart({
+        svgId: "stacked-bar-chart",
+        data: data,
+        keys: keys,
+        width: 500,
+        height: 400
+    });
+</script>
 </body>
-
 </html>
--->
