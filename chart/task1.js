@@ -1,4 +1,9 @@
 function renderAgeDistributionChart() {
+  // Định nghĩa color ở đây để dễ chỉnh sửa
+  const color = d3.scaleOrdinal()
+    .domain(["yes", "no"])
+    .range(["#FFB2AB", "#B2E0B1"]);
+
   d3.csv("../project_heart_disease.csv").then(data => {
     const container = d3.select("#chart-age-distribution");
     container.selectAll("svg").remove();
@@ -49,10 +54,6 @@ function renderAgeDistributionChart() {
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    const color = d3.scaleOrdinal()
-      .domain(["yes", "no"])
-      .range(["#e41a1c", "#377eb8"]);
 
     const tooltip = d3.select("body").append("div")
       .attr("class", "tooltip")
@@ -110,6 +111,15 @@ function renderAgeDistributionChart() {
       .ease(d3.easeCubicOut)
       .attr("y", d => y(d.yOffset + d.value))
       .attr("height", d => height - y(d.value));
+
+    // Title for the chart
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", -margin.top / 2)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .text("Age Distribution of Heart Disease Patients");
 
     // Axes
     svg.append("g")

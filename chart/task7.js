@@ -1,5 +1,9 @@
 function renderAgeDistributionChart() {
     d3.csv("../project_heart_disease.csv").then(data => {
+        // Define color variables here
+        const yesColor = "#FFB2AB";
+        const noColor = "#B2E0B1";
+
         const container = d3.select("#chart-family-history");
         container.selectAll("svg").remove();
 
@@ -39,8 +43,6 @@ function renderAgeDistributionChart() {
             return Object.values(resultMap);
         }
 
-        console.log(chartData(data)); // Log the result of chartData
-
         const margin = { top: 40, right: 100, bottom: 60, left: 60 },
             width = 800 - margin.left - margin.right,
             height = 400 - margin.top - margin.bottom;
@@ -66,7 +68,7 @@ function renderAgeDistributionChart() {
 
         const color = d3.scaleOrdinal()
             .domain(["yes", "no"])
-            .range(["#e41a1c", "#377eb8"]);
+            .range([yesColor, noColor]);
 
         const tooltip = d3.select("body").append("div")
             .attr("class", "tooltip")
@@ -124,6 +126,14 @@ function renderAgeDistributionChart() {
             .ease(d3.easeCubicOut)
             .attr("y", d => y(d.yOffset + d.value))
             .attr("height", d => height - y(d.value));
+
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", -margin.top / 2)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("font-weight", "bold")
+            .text("Family History of Heart Disease Patients");
 
         // Axes
         svg.append("g")
