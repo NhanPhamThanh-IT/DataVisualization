@@ -1,227 +1,119 @@
-import { CSV_FILE_PATH, TASK_7 } from "../constants/index.js";
-import { addTooltip } from "../utils/index.js";
+function drawSimpleStackedBarChart() {
+    // 1. Mock Data
+    const data = [
+        { category: "A", value1: 10, value2: 20, value3: 15 },
+        { category: "B", value1: 15, value2: 25, value3: 10 },
+        { category: "C", value1: 20, value2: 10, value3: 30 },
+        { category: "D", value1: 12, value2: 18, value3: 22 },
+    ];
 
-function loadData() {
-  return d3.csv(CSV_FILE_PATH).then(data => {
-    const cleanData = data.filter(d =>
-      d[TASK_7.ATTRIBUTES.src] &&
-      d[TASK_7.ATTRIBUTES.dest] &&
-      TASK_7.STATUS_VALUES.includes(d[TASK_7.ATTRIBUTES.dest].trim())
-    ).map(d => ({
-      familyHistory: d[TASK_7.ATTRIBUTES.src].trim(),
-      heartDisease: d[TASK_7.ATTRIBUTES.dest].trim()
-    }));
-    const grouped = d3.group(cleanData, d => d.familyHistory);
-    return Array.from(grouped, ([history, group]) => {
-      const total = group.length;
-      const withDisease = group.filter(d => d.heartDisease === "Yes").length;
-      return {
-        familyHistory: history,
-        withDisease: withDisease,
-        withoutDisease: total - withDisease,
-        percentage: (withDisease / total * 100).toFixed(1),
-        total: total
-      };
-    }).filter(d => d.familyHistory !== "Unknown");
-  });
-}
+    const keys = ["value1", "value2", "value3"]; // Keys for the stacks
 
-function createSVG(container, width, height, margin) {
-  return container.append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
-}
+    // 2. Setup SVG and Dimensions
+    const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const width = 500 - margin.left - margin.right;
+    const height = 300 - margin.top - margin.bottom;
 
-function createScales(chartData, width, height) {
-  const x = d3.scaleBand()
-    .domain(chartData.map(d => d.familyHistory))
-    .range([0, width])
-    .padding(0.3);
+    // Check if an SVG already exists, remove it
+    d3.select("#chart-family-history").select("svg").remove();
 
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(chartData, d => d.total)])
-    .range([height, 0])
-    .nice();
+    const svg = d3.select("#chart-family-history") // Ensure you have a div with this ID in your HTML
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const color = d3.scaleOrdinal()
-    .domain(["withDisease", "withoutDisease"])
-    .range(["#FF9999", "lightblue"]);
+    // 3. Scales
+    const x = d3.scaleBand()
+        .domain(data.map(d => d.category))
+        .range([0, width])
+        .padding(0.1);
 
-  return { x, y, color };
-}
+    const y = d3.scaleLinear()
+        // Calculate max Y value (sum of all values for each category)
+        .domain([0, d3.max(data, d => d.value1 + d.value2 + d.value3)])
+        .nice()
+        .range([height, 0]);
 
-function drawBars(svg, stackedData, x, y, color) {
-  const barGroups = svg.selectAll("g.layer")
-    .data(stackedData)
-    .join("g")
-    .attr("class", "layer")
-    .attr("fill", d => color(d.key));
+    const color = d3.scaleOrdinal()
+        .domain(keys)
+        .range(d3.schemeCategory10); // Or choose another color scheme
 
-  barGroups.selectAll("rect")
-    .data(d => d)
-    .join("rect")
-    .attr("x", d => x(d.data.familyHistory))
-    .attr("y", y(0))
-    .attr("width", x.bandwidth())
-    .attr("height", 0)
-    .transition()
-    .duration(1000)
-    .attr("y", d => y(d[1]))
-    .attr("height", d => y(d[0]) - y(d[1]));
-}
+    // 4. Stack Data
+    const stackedData = d3.stack()
+        .keys(keys)(data);
+    // stackedData structure: [ series1, series2, series3 ]
+    // Each series: [ [y0, y1], [y0, y1], ... ] for each category
+    // where y0 is the bottom and y1 is the top of the segment
 
-function addValueLabels(barGroups, x, y) {
-  barGroups.selectAll("text")
-    .data(d => d)
-    .join("text")
-    .attr("x", d => x(d.data.familyHistory) + x.bandwidth() / 2)
-    .attr("y", d => y(d[1]) + (y(d[0]) - y(d[1])) / 2)
-    .attr("text-anchor", "middle")
-    .attr("dy", "0.35em")
-    .style("fill", "black")
-    .style("font-size", "12px")
-    .style("font-weight", "bold")
-    .text(d => d[1] - d[0]);
-}
-
-function addAxes(svg, x, y, width, height) {
-  svg.append("g")
-    .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x))
-    .selectAll("text")
-    .style("text-anchor", "middle")
-    .style("font-size", "12px");
-
-  svg.append("g")
-    .call(d3.axisLeft(y))
-    .call(g => g.select(".domain").remove());
-}
-
-function addTitles(svg, width, height, margin, chartTitles) {
-  svg.append("text")
-    .attr("x", width / 2)
-    .attr("y", height + margin.bottom - 10)
-    .attr("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("font-weight", "bold")
-    .text(chartTitles.xAxisTitle);
-
-  svg.append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -height / 2)
-    .attr("y", -margin.left + 15)
-    .attr("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("font-weight", "bold")
-    .text(chartTitles.yAxisTitle);
-
-  svg.append("text")
-    .attr("x", width / 2)
-    .attr("y", -margin.top / 2)
-    .attr("text-anchor", "middle")
-    .style("font-size", "16px")
-    .style("font-weight", "bold")
-    .text(chartTitles.chartTitle);
-}
-
-function addLegend(svg, width) {
-  const legend = svg.append("g")
-    .attr("transform", `translate(${width + 10}, 0)`);
-
-  ["With Disease", "Without Disease"].forEach((text, i) => {
-    const g = legend.append("g")
-      .attr("transform", `translate(0, ${i * 25})`);
-
-    g.append("rect")
-      .attr("width", 18)
-      .attr("height", 18)
-      .attr("fill", text == "With Disease" ? "#FF9999" : "lightblue");
-
-    g.append("text")
-      .attr("x", 25)
-      .attr("y", 14)
-      .style("font-size", "12px")
-      .text(text);
-  });
-}
-
-function handleMouseEvents(barGroups, tooltip) {
-  barGroups.selectAll("rect")
-    .on("mouseover", function (event, d) {
-      const type = d3.select(this.parentNode).datum().key === "withDisease" ? "Disease" : "No Disease";
-      const value = type === "Disease" ? d.data.withDisease : d.data.withoutDisease;
-      const percentage = type === "Disease" ?
-        d.data.percentage :
-        (100 - parseFloat(d.data.percentage)).toFixed(1);
-
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .style("opacity", 0.8);
-
-      tooltip.transition()
-        .duration(200)
-        .style("opacity", 0.9);
-
-      tooltip.html(`
-        <div style="font-weight: bold">${d.data.familyHistory}</div>
-        <div>${type}: ${value} patients (${percentage}%)</div>
-      `)
-        .style("left", (event.pageX + 10) + "px")
-        .style("top", (event.pageY - 28) + "px");
-    })
-    .on("mouseout", function () {
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .style("opacity", 1);
-
-      tooltip.transition()
-        .duration(500)
-        .style("opacity", 0);
-    });
-}
-
-function renderFamilyHistoryChart() {
-  loadData().then(chartData => {
-    const container = d3.select("#chart-family-history");
-    container.selectAll("svg").remove();
-    const margin = { top: 40, right: 160, bottom: 60, left: 60 },
-      width = 900 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
-    const svg = createSVG(container, width, height, margin);
-    const { x, y, color } = createScales(chartData, width, height);
+    // 5. Draw Axes
+    // X Axis
     svg.append("g")
-      .attr("class", "grid")
-      .call(d3.axisLeft(y)
-        .tickSize(-width)
-        .tickFormat("")
-      )
-      .style("stroke-dasharray", "2,2")
-      .style("opacity", 0.1);
-    const stack = d3.stack()
-      .keys(["withoutDisease", "withDisease"])
-      .order(d3.stackOrderNone)
-      .offset(d3.stackOffsetNone);
-    const stackedData = stack(chartData.map(d => ({
-      familyHistory: d.familyHistory,
-      withDisease: d.withDisease,
-      withoutDisease: d.withoutDisease
-    })));
-    drawBars(svg, stackedData, x, y, color);
-    addValueLabels(svg.selectAll("g.layer"), x, y);
-    addAxes(svg, x, y, width, height);
-    addTitles(svg, width, height, margin, TASK_7.TITLES);
-    addLegend(svg, width);
-    const tooltip = addTooltip();
-    handleMouseEvents(svg.selectAll("g.layer"), tooltip);
-  });
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x));
+
+    // Y Axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // 6. Draw Bars
+    svg.append("g")
+        .selectAll("g")
+        // Bind the stacked data (one group per series/key)
+        .data(stackedData)
+        .join("g")
+          .attr("fill", d => color(d.key)) // Color based on the key (value1, value2, etc.)
+          .selectAll("rect")
+          // Bind the data points within each series
+          .data(d => d)
+          .join("rect")
+            .attr("x", d => x(d.data.category)) // Use the original data bound to the stack segment
+            .attr("y", d => y(d[1])) // d[1] is the top y-coordinate
+            .attr("height", d => y(d[0]) - y(d[1])) // Height is difference between bottom and top
+            .attr("width", x.bandwidth());
+
+    // Optional: Add a simple legend
+    const legend = svg.append("g")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 10)
+        .attr("text-anchor", "end")
+        .selectAll("g")
+        .data(keys.slice().reverse()) // Reverse to match stack order visually
+        .join("g")
+          .attr("transform", (d, i) => `translate(0,${i * 20})`);
+
+    legend.append("rect")
+        .attr("x", width - 19)
+        .attr("width", 19)
+        .attr("height", 19)
+        .attr("fill", color);
+
+    legend.append("text")
+        .attr("x", width - 24)
+        .attr("y", 9.5)
+        .attr("dy", "0.32em")
+        .text(d => d);
+
 }
 
-if (document.querySelector(`#${TASK_7.DATA_TARGET}`).classList.contains("active")) {
-  renderFamilyHistoryChart();
-}
-document.querySelector(`[data-target=${TASK_7.DATA_TARGET}]`)
-  .addEventListener("click", renderFamilyHistoryChart);
+// Example of how to call it (assuming you have a div with id="simple-stacked-bar-chart-container" in your HTML)
+// Make sure this runs after the DOM is ready
+// document.addEventListener('DOMContentLoaded', drawSimpleStackedBarChart);
+
+// Or if using modules and called from main.js:
+// export { drawSimpleStackedBarChart };
+// Then in main.js: import { drawSimpleStackedBarChart } from './task7.js'; drawSimpleStackedBarChart();
+
+// For standalone testing, you might add a container div and call the function directly
+/*
+// Add this to your HTML: <div id="simple-stacked-bar-chart-container"></div>
+// Then uncomment this line:
+drawSimpleStackedBarChart();
+*/
+
+if (document.querySelector("#family-history").classList.contains("active")) {
+    renderBMIChart();
+  }
+  document.querySelector("[data-target='family-history']")
+    .addEventListener("click", renderBMIChart);

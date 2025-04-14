@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Reusable Stacked Bar Chart with Tooltip</title>
@@ -41,114 +42,133 @@
         }
     </style>
 </head>
+
 <body>
 
-<svg id="stacked-bar-chart"></svg>
-<div class="tooltip" id="tooltip"></div>
+    <svg id="stacked-bar-chart"></svg>
+    <div class="tooltip" id="tooltip"></div>
 
-<script>
-    function drawStackedBarChart({ svgId, data, keys, width = 600, height = 400, margin = { top: 20, right: 30, bottom: 40, left: 50 } }) {
-        const svg = d3.select(`#${svgId}`)
-            .attr("width", width)
-            .attr("height", height)
-            .html("") // clear existing content
-            .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`);
+    <script>
+        function drawStackedBarChart({
+            svgId,
+            data,
+            keys,
+            title = "Biểu đồ cột chồng",
+            width = 600,
+            height = 400,
+            margin = { top: 40, right: 30, bottom: 40, left: 30 }
+        }) {
+            const svg = d3.select(`#${svgId}`)
+                .attr("width", width)
+                .attr("height", height)
+                .html("") // clear existing content
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        const innerWidth = width - margin.left - margin.right;
-        const innerHeight = height - margin.top - margin.bottom;
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
 
-        const stack = d3.stack().keys(keys);
-        const stackedData = stack(data);
+            // Thêm tiêu đề biểu đồ
+            svg.append("text")
+                .attr("x", innerWidth / 2)
+                .attr("y", -margin.top / 2)
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .style("font-weight", "bold")
+                .text(title);
 
-        const xScale = d3.scaleBand()
-            .domain(data.map(d => d.category))
-            .range([0, innerWidth])
-            .padding(0.2);
+            const stack = d3.stack().keys(keys);
+            const stackedData = stack(data);
 
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(stackedData[stackedData.length - 1], d => d[1])])
-            .nice()
-            .range([innerHeight, 0]);
+            const xScale = d3.scaleBand()
+                .domain(data.map(d => d.category))
+                .range([0, innerWidth])
+                .padding(0.2);
 
-        const colorScale = d3.scaleOrdinal()
-            .domain(keys)
-            .range(d3.schemeCategory10);
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(stackedData[stackedData.length - 1], d => d[1])])
+                .nice()
+                .range([innerHeight, 0]);
 
-        // Tooltip
-        const tooltip = d3.select("#tooltip");
+            const colorScale = d3.scaleOrdinal()
+                .domain(keys)
+                .range(d3.schemeCategory10);
 
-        // Axes
-        svg.append("g")
-            .attr("transform", `translate(0,${innerHeight})`)
-            .call(d3.axisBottom(xScale));
+            const tooltip = d3.select("#tooltip");
 
-        svg.append("g")
-            .call(d3.axisLeft(yScale));
+            // Axes
+            svg.append("g")
+                .attr("transform", `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(xScale));
 
-        // Bars
-        const groups = svg.selectAll("g.layer")
-            .data(stackedData)
-            .enter().append("g")
-            .attr("class", "layer")
-            .style("fill", d => colorScale(d.key));
+            svg.append("g")
+                .call(d3.axisLeft(yScale));
 
-        groups.selectAll("rect")
-            .data(d => d.map(p => ({ ...p, key: d.key })))
-            .enter().append("rect")
-            .attr("x", d => xScale(d.data.category))
-            .attr("y", d => yScale(d[1]))
-            .attr("height", d => yScale(d[0]) - yScale(d[1]))
-            .attr("width", xScale.bandwidth())
-            .on("mouseover", (event, d) => {
-                tooltip.transition().style("opacity", 1);
-                tooltip.html(`Category: <b>${d.data.category}</b><br>${d.key}: <b>${d.data[d.key]}</b>`);
-            })
-            .on("mousemove", (event) => {
-                tooltip.style("left", (event.pageX + 10) + "px")
-                       .style("top", (event.pageY - 28) + "px");
-            })
-            .on("mouseout", () => {
-                tooltip.transition().style("opacity", 0);
-            });
+            // Bars
+            const groups = svg.selectAll("g.layer")
+                .data(stackedData)
+                .enter().append("g")
+                .attr("class", "layer")
+                .style("fill", d => colorScale(d.key));
 
-        // Legend
-        const legend = svg.selectAll(".legend")
-            .data(keys.slice().reverse())
-            .enter().append("g")
-            .attr("class", "legend")
-            .attr("transform", (d, i) => `translate(0,${i * 20})`);
+            groups.selectAll("rect")
+                .data(d => d.map(p => ({ ...p, key: d.key })))
+                .enter().append("rect")
+                .attr("x", d => xScale(d.data.category))
+                .attr("y", d => yScale(d[1]))
+                .attr("height", d => yScale(d[0]) - yScale(d[1]))
+                .attr("width", xScale.bandwidth())
+                .on("mouseover", (event, d) => {
+                    tooltip.transition().style("opacity", 1);
+                    tooltip.html(`Category: <b>${d.data.category}</b><br>${d.key}: <b>${d.data[d.key]}</b>`);
+                })
+                .on("mousemove", (event) => {
+                    tooltip.style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", () => {
+                    tooltip.transition().style("opacity", 0);
+                });
 
-        legend.append("rect")
-            .attr("x", innerWidth - 18)
-            .attr("width", 18)
-            .attr("height", 18)
-            .style("fill", colorScale);
+            // Legend
+            const legend = svg.selectAll(".legend")
+                .data(keys.slice().reverse())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", (d, i) => `translate(25,${i * 20})`);
 
-        legend.append("text")
-            .attr("x", innerWidth - 24)
-            .attr("y", 9)
-            .attr("dy", ".35em")
-            .style("text-anchor", "end")
-            .text(d => d);
-    }
+            legend.append("rect")
+                .attr("x", innerWidth - 18)
+                .attr("width", 18)
+                .attr("height", 18)
+                .style("fill", colorScale);
 
-    // Example usage
-    const data = [
-        { category: "A", value1: 10, value2: 20, value3: 15 },
-        { category: "B", value1: 15, value2: 25, value3: 10 },
-        { category: "C", value1: 20, value2: 10, value3: 25 }
-    ];
+            legend.append("text")
+                .attr("x", innerWidth - 24)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .style("text-anchor", "end")
+                .text(d => d);
+        }
 
-    const keys = ["value1", "value2", "value3"];
+        // Example usage
+        const data = [
+            { category: "A", value1: 10, value2: 20, value3: 15 },
+            { category: "B", value1: 15, value2: 25, value3: 10 },
+            { category: "C", value1: 20, value2: 10, value3: 25 }
+        ];
 
-    drawStackedBarChart({
-        svgId: "stacked-bar-chart",
-        data: data,
-        keys: keys,
-        width: 500,
-        height: 400
-    });
-</script>
+        const keys = ["value1", "value2", "value3"];
+
+        drawStackedBarChart({
+            svgId: "stacked-bar-chart",
+            data: data,
+            keys: keys,
+            width: 700,
+            height: 400,
+            title: "Tổng quan giá trị theo nhóm"
+        });
+    </script>
 </body>
+
 </html>
