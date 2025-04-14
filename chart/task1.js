@@ -3,6 +3,12 @@ function renderAgeDistributionChart() {
     const container = d3.select("#chart-age-distribution");
     container.selectAll("svg").remove();
 
+    // Fade-in effect for the whole chart
+    container.style("opacity", 0)
+      .transition()
+      .duration(1250)
+      .style("opacity", 1);
+
     data.forEach(d => {
       d.Age = +d.Age;
       d["Heart Disease Status"] = d["Heart Disease Status"].trim();
@@ -65,18 +71,17 @@ function renderAgeDistributionChart() {
       .append("g")
       .attr("transform", d => `translate(${x(d.ageGroup)},0)`);
 
+    // Hiệu ứng khi xuất hiện cột
     bars.selectAll("rect")
-      .data(d => {
-        return [
-          { key: "yes", value: d.yes, yOffset: 0, group: d.ageGroup },
-          { key: "no", value: d.no, yOffset: d.yes, group: d.ageGroup }
-        ];
-      })
+      .data(d => [
+        { key: "yes", value: d.yes, yOffset: 0, group: d.ageGroup },
+        { key: "no", value: d.no, yOffset: d.yes, group: d.ageGroup }
+      ])
       .join("rect")
       .attr("x", 0)
-      .attr("y", d => y(d.yOffset + d.value))
       .attr("width", x.bandwidth())
-      .attr("height", d => height - y(d.value))
+      .attr("y", height) // bắt đầu từ đáy
+      .attr("height", 0) // bắt đầu từ 0
       .attr("fill", d => color(d.key))
       .attr("stroke", "white")
       .on("mouseover", function (event, d) {
@@ -98,7 +103,13 @@ function renderAgeDistributionChart() {
       .on("mouseout", function () {
         d3.select(this).style("opacity", 1);
         tooltip.style("visibility", "hidden");
-      });
+      })
+      .transition()
+      .duration(1000)
+      .delay((d, i) => i * 100)
+      .ease(d3.easeCubicOut)
+      .attr("y", d => y(d.yOffset + d.value))
+      .attr("height", d => height - y(d.value));
 
     // Axes
     svg.append("g")
