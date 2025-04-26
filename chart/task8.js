@@ -1,4 +1,4 @@
-function renderCholesterolGenderChart() {
+export function renderCholesterolGenderChart() {
   d3.csv("../project_heart_disease.csv").then(data => {
     const container = d3.select("#chart-cholesterol-gender");
     container.selectAll("svg").remove();
@@ -140,9 +140,9 @@ function renderCholesterolGenderChart() {
   });
 }
 
-// Activate on load or when clicking tab
-if (document.querySelector("#cholesterol-gender").classList.contains("active")) {
-  renderCholesterolGenderChart();
-}
-document.querySelector("[data-target='cholesterol-gender']")
-  .addEventListener("click", renderCholesterolGenderChart);
+// // Activate on load or when clicking tab
+// if (document.querySelector("#cholesterol-gender").classList.contains("active")) {
+//   renderCholesterolGenderChart();
+// }
+// document.querySelector("[data-target='cholesterol-gender']")
+//   .addEventListener("click", renderCholesterolGenderChart);

@@ -1,4 +1,4 @@
-function renderAgeDistributionChart() {
+export function renderAgeDistributionChart() {
   // Định nghĩa color ở đây để dễ chỉnh sửa
   const color = d3.scaleOrdinal()
     .domain(["yes", "no"])
@@ -168,10 +168,3 @@ function renderAgeDistributionChart() {
     });
   });
 }
-
-// Kích hoạt khi load hoặc khi click tab
-if (document.querySelector("#age-distribution").classList.contains("active")) {
-  renderAgeDistributionChart();
-}
-document.querySelector("[data-target='age-distribution']")
-  .addEventListener("click", renderAgeDistributionChart);

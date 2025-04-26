@@ -1,4 +1,4 @@
-function renderSmokingChart() {
+export function renderSmokingChart() {
   d3.csv("../project_heart_disease.csv").then(data => {
     const container = d3.select("#chart-smoking-disease");
     container.selectAll("svg").remove();
@@ -172,11 +172,4 @@ function renderSmokingChart() {
     });
   });
 }
-
-// Activate on load or when clicking tab
-if (document.querySelector("#smoking-disease").classList.contains("active")) {
-  renderSmokingChart();
-}
-document.querySelector("[data-target='smoking-disease']")
-  .addEventListener("click", renderSmokingChart);
   

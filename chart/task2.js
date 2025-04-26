@@ -1,4 +1,4 @@
-function renderGenderPieChart() {
+export function renderGenderPieChart() {
   d3.csv("../project_heart_disease.csv").then(data => {
     const container = d3.select("#chart-gender-disease");
     container.selectAll("svg").remove();
@@ -78,7 +78,7 @@ function renderGenderPieChart() {
         .attr("stroke", "white")
         .style("stroke-width", "2px")
         .style("transition", "all 0.3s")
-        .on("mouseover", function(event, d) {
+        .on("mouseover", function (event, d) {
           const percent = ((d.data.count / total) * 100).toFixed(1);
           tooltip.transition()
             .duration(200)
@@ -88,17 +88,17 @@ function renderGenderPieChart() {
                        Percentage: ${percent}%`)
             .style("left", (event.pageX + 10) + "px")
             .style("top", (event.pageY - 28) + "px");
-          
+
           d3.select(this)
             .transition()
             .duration(200)
             .attr("d", arcHover);
         })
-        .on("mouseout", function(d) {
+        .on("mouseout", function (d) {
           tooltip.transition()
             .duration(500)
             .style("opacity", 0);
-          
+
           d3.select(this)
             .transition()
             .duration(200)
@@ -132,7 +132,7 @@ function renderGenderPieChart() {
 
     // Legend
     const legend = svg.append("g")
-      .attr("transform", `translate(${width * 2 - 20}, ${height/4})`);
+      .attr("transform", `translate(${width * 2 - 20}, ${height / 4})`);
     ["Yes", "No"].forEach((label, i) => {
       const g = legend.append("g").attr("transform", `translate(0, ${i * 25})`);
       g.append("rect").attr("width", 16).attr("height", 16).attr("fill", color(label));
@@ -144,9 +144,3 @@ function renderGenderPieChart() {
     });
   });
 }
-
-// Gọi khi trang load hoặc khi click tab
-if (document.querySelector("#gender-disease").classList.contains("active")) {
-  renderGenderPieChart();
-}
-document.querySelector("[data-target='gender-disease']").addEventListener("click", renderGenderPieChart);

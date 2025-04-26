@@ -1,4 +1,4 @@
-function renderAgeDistributionChart() {
+export function renderFamilyHistoryChart() {
     d3.csv("../project_heart_disease.csv").then(data => {
         // Define color variables here
         const yesColor = "#FFB2AB";
@@ -183,9 +183,9 @@ function renderAgeDistributionChart() {
     });
 }
 
-if (document.querySelector("#family-history").classList.contains("active")) {
-    renderAgeDistributionChart();
-}
+// if (document.querySelector("#family-history").classList.contains("active")) {
+//     renderAgeDistributionChart();
+// }
 
-document.querySelector("[data-target='family-history']")
-    .addEventListener("click", renderAgeDistributionChart);
+// document.querySelector("[data-target='family-history']")
+//     .addEventListener("click", renderAgeDistributionChart);

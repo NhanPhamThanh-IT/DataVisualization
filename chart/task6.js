@@ -1,4 +1,4 @@
-function renderBMIChart() {
+export function renderBMIChart() {
   d3.csv("../project_heart_disease.csv").then(data => {
     const container = d3.select("#chart-bmi-disease");
     container.selectAll("svg").remove();
@@ -184,9 +184,9 @@ function renderBMIChart() {
   });
 }
 
-// Activate on load or when clicking tab
-if (document.querySelector("#bmi-disease").classList.contains("active")) {
-  renderBMIChart();
-}
-document.querySelector("[data-target='bmi-disease']")
-  .addEventListener("click", renderBMIChart);
+// // Activate on load or when clicking tab
+// if (document.querySelector("#bmi-disease").classList.contains("active")) {
+//   renderBMIChart();
+// }
+// document.querySelector("[data-target='bmi-disease']")
+//   .addEventListener("click", renderBMIChart);

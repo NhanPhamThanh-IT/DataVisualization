@@ -1,4 +1,4 @@
-function renderCholesterolChart() {
+export function renderCholesterolChart() {
   d3.csv("../project_heart_disease.csv").then(data => {
     const container = d3.select("#chart-cholesterol-disease");
     container.selectAll("svg").remove();
@@ -240,9 +240,9 @@ function renderCholesterolChart() {
   });
 }
 
-// Activate on load or when clicking tab
-if (document.querySelector("#cholesterol-disease").classList.contains("active")) {
-  renderCholesterolChart();
-}
-document.querySelector("[data-target='cholesterol-disease']")
-  .addEventListener("click", renderCholesterolChart);
+// // Activate on load or when clicking tab
+// if (document.querySelector("#cholesterol-disease").classList.contains("active")) {
+//   renderCholesterolChart();
+// }
+// document.querySelector("[data-target='cholesterol-disease']")
+//   .addEventListener("click", renderCholesterolChart);
