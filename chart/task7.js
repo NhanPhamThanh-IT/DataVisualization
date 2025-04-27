@@ -1,224 +1,191 @@
-function renderFamilyHistoryChart() {
-  d3.csv("../project_heart_disease.csv").then(data => {
-    const container = d3.select("#chart-family-history");
-    container.selectAll("svg").remove();
+export function renderFamilyHistoryChart() {
+    d3.csv("../project_heart_disease.csv").then(data => {
+        // Define color variables here
+        const yesColor = "#FFB2AB";
+        const noColor = "#B2E0B1";
 
-    const cleanData = data.filter(d => 
-        d["Family Heart Disease"] && 
-        d["Heart Disease Status"] && 
-        ["Yes", "No"].includes(d["Heart Disease Status"].trim())
-      ).map(d => ({
-        familyHistory: d["Family Heart Disease"].trim(),
-        heartDisease: d["Heart Disease Status"].trim()
-      }));
-  
-      // Aggregate data for stacked bars
-      const grouped = d3.group(cleanData, d => d.familyHistory);
-      
+        const container = d3.select("#chart-family-history");
+        container.selectAll("svg").remove();
 
-    const chartData = Array.from(grouped, ([history, group]) => {
-        const total = group.length;
-        const withDisease = group.filter(d => d.heartDisease === "Yes").length;
-        return {
-          familyHistory: history,
-          withDisease: withDisease,
-          withoutDisease: total - withDisease,
-          percentage: (withDisease / total * 100).toFixed(1),
-          total: total
-        };
-      }).filter(d => d.familyHistory !== "Unknown");
+        // Fade-in effect for the whole chart
+        container.style("opacity", 0)
+            .transition()
+            .duration(1000)
+            .style("opacity", 1);
 
-    // Chart dimensions
-    const margin = { top: 40, right: 160, bottom: 60, left: 60 },
-      width = 900 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
+        const chartData = (data) => {
+            const resultMap = {};
 
-    // Create SVG
-    const svg = container.append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+            data.forEach((item) => {
+                const familyHistory = item["Family Heart Disease"];
+                const heartStatus = item["Heart Disease Status"];
 
-    // Scales
-    const x = d3.scaleBand()
-      .domain(chartData.map(d => d.familyHistory))
-      .range([0, width])
-      .padding(0.3);
+                if (familyHistory === "") {
+                    return;
+                }
 
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(chartData, d => d.total)])
-      .range([height, 0])
-      .nice();
+                if (!resultMap[familyHistory]) {
+                    resultMap[familyHistory] = {
+                        "Family Heart Disease": familyHistory,
+                        yes: 0,
+                        no: 0
+                    };
+                }
 
-    const color = d3.scaleOrdinal()
-      .domain(["withDisease", "withoutDisease"])
-      .range(["#FF9999", "lightblue"]);
+                if (heartStatus === "Yes") {
+                    resultMap[familyHistory].yes += 1;
+                } else if (heartStatus === "No") {
+                    resultMap[familyHistory].no += 1;
+                }
+            });
 
-    // Add grid lines
-    svg.append("g")
-      .attr("class", "grid")
-      .call(d3.axisLeft(y)
-        .tickSize(-width)
-        .tickFormat("")
-      )
-      .style("stroke-dasharray", "2,2")
-      .style("opacity", 0.1);
+            // Chuyển từ object về array
+            return Object.values(resultMap);
+        }
 
-    // Create stacked data
-    const stack = d3.stack()
-      .keys(["withDisease", "withoutDisease"])
-      .order(d3.stackOrderNone)
-      .offset(d3.stackOffsetNone);
+        const margin = { top: 40, right: 100, bottom: 60, left: 60 },
+            width = 800 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
 
-    const stackedData = stack(chartData.map(d => ({
-      familyHistory: d.familyHistory,
-      withDisease: d.withDisease,
-      withoutDisease: d.withoutDisease
-    })));
+        const chartDataResult = chartData(data);  // Call chartData here
 
-    // Add bars
-    const barGroups = svg.selectAll("g.layer")
-      .data(stackedData)
-      .join("g")
-      .attr("class", "layer")
-      .attr("fill", d => color(d.key));
+        // Ensure 'ageGroup' is being used correctly in your data
+        const x = d3.scaleBand()
+            .domain(chartDataResult.map(d => d["Family Heart Disease"])) // Adjust to match correct property
+            .range([0, width])
+            .padding(0.2);
 
-    const bars = barGroups.selectAll("rect")
-      .data(d => d)
-      .join("rect")
-      .attr("x", d => x(d.data.familyHistory))
-      .attr("y", height)
-      .attr("width", x.bandwidth())
-      .attr("height", 0)
-      .transition()
-      .duration(1000)
-      .attr("y", d => y(d[1]))
-      .attr("height", d => y(d[0]) - y(d[1]));
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(chartDataResult, d => d.yes + d.no)])
+            .nice()
+            .range([height, 0]);
 
-    // Add value labels
-    barGroups.selectAll("text")
-      .data(d => d)
-      .join("text")
-      .attr("x", d => x(d.data.familyHistory) + x.bandwidth()/2)
-      .attr("y", d => y(d[1]) + (y(d[0]) - y(d[1]))/2)
-      .attr("text-anchor", "middle")
-      .attr("dy", "0.35em")
-      .style("fill", "black")
-      .style("font-size", "12px")
-      .style("font-weight", "bold")
-      .text(d => d[1] - d[0]);
+        const svg = container.append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Add axes
-    svg.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x))
-      .selectAll("text")
-      .style("text-anchor", "middle")
-      .style("font-size", "12px");
+        const color = d3.scaleOrdinal()
+            .domain(["yes", "no"])
+            .range([yesColor, noColor]);
 
-    svg.append("g")
-      .call(d3.axisLeft(y))
-      .call(g => g.select(".domain").remove());
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("visibility", "hidden")
+            .style("position", "absolute")
+            .style("background-color", "white")
+            .style("border", "1px solid #ccc")
+            .style("padding", "8px")
+            .style("border-radius", "5px")
+            .style("pointer-events", "none")
+            .style("box-shadow", "0 2px 8px rgba(0,0,0,0.2)");
 
-    // Add labels
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", height + margin.bottom - 10)
-      .attr("text-anchor", "middle")
-      .style("font-size", "14px")
-      .style("font-weight", "bold")
-      .text("Family History");
+        const bars = svg.selectAll(".bar-group")
+            .data(chartDataResult)
+            .enter()
+            .append("g")
+            .attr("transform", d => `translate(${x(d["Family Heart Disease"])},0)`);
 
-    svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("x", -height / 2)
-      .attr("y", -margin.left + 15)
-      .attr("text-anchor", "middle")
-      .style("font-size", "14px")
-      .style("font-weight", "bold")
-      .text("Number of Patients");
+        // Hiệu ứng khi xuất hiện cột
+        bars.selectAll("rect")
+            .data(d => [
+                { key: "yes", value: d.yes, yOffset: 0, group: d["Family Heart Disease"] },
+                { key: "no", value: d.no, yOffset: d.yes, group: d["Family Heart Disease"] }
+            ])
+            .join("rect")
+            .attr("x", 0)
+            .attr("width", x.bandwidth())
+            .attr("y", height) // bắt đầu từ đáy
+            .attr("height", 0) // bắt đầu từ 0
+            .attr("fill", d => color(d.key))
+            .attr("stroke", "white")
+            .on("mouseover", function (event, d) {
+                d3.select(this)
+                    .style("opacity", 0.8)
+                    .style("cursor", "pointer");
 
-    // Add title
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", -margin.top / 2)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("font-weight", "bold")
-      .text("Distribution of Heart Disease by Family History");
+                tooltip
+                    .style("visibility", "visible")
+                    .text(`Family history status: ${d.group}, ${d.key === "yes" ? "Heart Disease" : "No Disease"}: ${d.value}`)
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY - 10}px`);
+            })
+            .on("mousemove", function (event) {
+                tooltip
+                    .style("left", `${event.pageX + 10}px`)
+                    .style("top", `${event.pageY - 10}px`);
+            })
+            .on("mouseout", function () {
+                d3.select(this).style("opacity", 1);
+                tooltip.style("visibility", "hidden");
+            })
+            .transition()
+            .duration(1000)
+            .delay((d, i) => i * 100)
+            .ease(d3.easeCubicOut)
+            .attr("y", d => y(d.yOffset + d.value))
+            .attr("height", d => height - y(d.value));
 
-    // Add legend
-    const legend = svg.append("g")
-      .attr("transform", `translate(${width + 10}, 0)`);
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", -margin.top / 2)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .style("font-weight", "bold")
+            .text("Family History of Heart Disease Patients");
 
-    ["With Disease", "Without Disease"].forEach((text, i) => {
-      const g = legend.append("g")
-        .attr("transform", `translate(0, ${i * 25})`);
-      
-      g.append("rect")
-        .attr("width", 18)
-        .attr("height", 18)
-        .attr("fill",  text == "With Disease" ? "#FF9999" : "lightblue")    ;
+        // Axes
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x))
+            .style("font-size", "12px");
 
-      g.append("text")
-        .attr("x", 25)
-        .attr("y", 14)
-        .style("font-size", "12px")
-        .text(text);
+        svg.append("g")
+            .call(d3.axisLeft(y))
+            .style("font-size", "12px");
+
+        // Labels
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", height + margin.bottom - 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Family history status");
+
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height / 2)
+            .attr("y", -margin.left + 15)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Number of Patients");
+
+        // Legend
+        const legend = svg.append("g")
+            .attr("transform", `translate(${width + 10}, 0)`);
+
+        ["yes", "no"].forEach((status, i) => {
+            const g = legend.append("g")
+                .attr("transform", `translate(0,${i * 20})`);
+
+            g.append("rect")
+                .attr("width", 15)
+                .attr("height", 15)
+                .attr("fill", color(status));
+
+            g.append("text")
+                .attr("x", 25)
+                .attr("y", 12)
+                .style("font-size", "12px")
+                .text(status === "yes" ? "Has Heart Disease" : "No Heart Disease");
+        });
     });
-
-    // Add tooltip
-    const tooltip = d3.select("body").append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0)
-      .style("position", "absolute")
-      .style("background-color", "white")
-      .style("padding", "10px")
-      .style("border-radius", "5px")
-      .style("box-shadow", "0 0 10px rgba(0,0,0,0.1)");
-
-    // Add interactivity
-    barGroups.selectAll("rect")
-      .on("mouseover", function(event, d) {
-        const type = d3.select(this.parentNode).datum().key === "withDisease" ? "Disease" : "No Disease";
-        const value = type === "Disease" ? d.data.withDisease : d.data.withoutDisease;
-        const percentage = type === "Disease" ? 
-          d.data.percentage : 
-          (100 - parseFloat(d.data.percentage)).toFixed(1);
-
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style("opacity", 0.8);
-
-        tooltip.transition()
-          .duration(200)
-          .style("opacity", 0.9);
-
-        tooltip.html(`
-          <div style="font-weight: bold">${d.data.familyHistory}</div>
-          <div>${type}: ${value} patients (${percentage}%)</div>
-        `)
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 28) + "px");
-      })
-      .on("mouseout", function() {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style("opacity", 1);
-
-        tooltip.transition()
-          .duration(500)
-          .style("opacity", 0);
-      });
-  });
 }
 
-// Activate on load or when clicking tab
-if (document.querySelector("#family-history").classList.contains("active")) {
-  renderFamilyHistoryChart();
-}
-document.querySelector("[data-target='family-history']")
-  .addEventListener("click", renderFamilyHistoryChart);
+// if (document.querySelector("#family-history").classList.contains("active")) {
+//     renderAgeDistributionChart();
+// }
+
+// document.querySelector("[data-target='family-history']")
+//     .addEventListener("click", renderAgeDistributionChart);

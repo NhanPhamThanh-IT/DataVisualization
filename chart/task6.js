@@ -1,7 +1,13 @@
-function renderBMIChart() {
+export function renderBMIChart(isDashboard = false) {
+  const selector = isDashboard ? "#chart-bmi-disease-dash" : "#chart-bmi-disease";
   d3.csv("../project_heart_disease.csv").then(data => {
-    const container = d3.select("#chart-bmi-disease");
+    const container = d3.select(selector);
     container.selectAll("svg").remove();
+
+    container.style("opacity", 0)
+    .transition()
+    .duration(1250)
+    .style("opacity", 1);
 
     // Data preprocessing and cleaning
     const cleanData = data.filter(d => 
@@ -13,12 +19,49 @@ function renderBMIChart() {
         status: d["Heart Disease Status"].trim()
       }));
 
-    const sampleData = cleanData.filter((_, i) => i % 2 === 0);
+    // Group by BMI and disease status to get counts
+    const bmiRange = d3.range(16, 43, 0.5); // Create BMI ranges for binning
+    const countsByBmiAndStatus = [];
+    
+    // Process data to count patients for each BMI value and disease status
+    bmiRange.forEach(bmiValue => {
+      // Count patients with heart disease
+      const yesCount = cleanData.filter(d => 
+        d.bmi >= bmiValue - 0.25 && d.bmi < bmiValue + 0.25 && d.status === "Yes"
+      ).length;
+      
+      // Count patients without heart disease
+      const noCount = cleanData.filter(d => 
+        d.bmi >= bmiValue - 0.25 && d.bmi < bmiValue + 0.25 && d.status === "No"
+      ).length;
+      
+      // Add to our data array if there are any patients in this range
+      if (yesCount > 0) {
+        countsByBmiAndStatus.push({
+          bmi: bmiValue,
+          status: "Yes",
+          count: yesCount
+        });
+      }
+      
+      if (noCount > 0) {
+        countsByBmiAndStatus.push({
+          bmi: bmiValue,
+          status: "No",
+          count: noCount
+        });
+      }
+    });
     
     // Chart dimensions
-    const margin = { top: 40, right: 160, bottom: 60, left: 60 },
-      width = 900 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
+    const margin = isDashboard ? {top: 30, right: 100, bottom: 60, left: 40 }
+     :{top: 40, right: 160, bottom: 60, left: 60 };
+
+    const width = isDashboard ? 800 - margin.left - margin.right:900 - margin.left - margin.right,
+      height = isDashboard ? 310 - margin.top - margin.bottom :400 - margin.top - margin.bottom;
+
+    // Find maximum count for y-axis scale
+    const maxCount = d3.max(countsByBmiAndStatus, d => d.count);
 
     // Create SVG
     const svg = container.append("svg")
@@ -33,7 +76,7 @@ function renderBMIChart() {
       .range([0, width]);
 
     const y = d3.scaleLinear()
-      .domain([0, 50])  // Distribution range
+      .domain([0, maxCount + 2])  // Count range with some padding
       .range([height, 0]);
 
     // Color scale
@@ -59,22 +102,15 @@ function renderBMIChart() {
       .style("stroke-dasharray", "2,2")
       .style("opacity", 0.1);
 
-    // Add scatter points with transition
+    // Add scatter points representing counts
     svg.selectAll("circle")
-      .data(sampleData)
+      .data(countsByBmiAndStatus)
       .join("circle")
       .attr("cx", d => x(d.bmi))
-      .attr("cy", d => {
-        // Calculate position based on disease status
-        if (d.status === "Yes") {
-          return y(Math.random() * 15 + 5); // Lower range for disease cases
-        } else {
-          return y(Math.random() * 15 + 30); // Upper range for non-disease cases
-        }
-      })
-      .attr("r", d => d.status === "No" ? 2 : 3)  // Smaller points for no disease
+      .attr("cy", d => y(d.count))  // Use actual patient count
+      .attr("r", d => Math.max(3, Math.min(8, d.count * 0.8)))  // Size based on count
       .attr("fill", d => color(d.status))
-      .attr("opacity", d => d.status === "No" ? 0.4 : 0.7);
+      .attr("opacity", d => d.status === "No" ? 0.5 : 0.7);
 
     // Add axes
     svg.append("g")
@@ -85,7 +121,9 @@ function renderBMIChart() {
       .style("text-anchor", "middle");
 
     svg.append("g")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y)
+        .ticks(5)
+        .tickFormat(d3.format("d"))); // Format as integers
 
     // Add labels
     svg.append("text")
@@ -103,7 +141,7 @@ function renderBMIChart() {
       .attr("text-anchor", "middle")
       .style("font-size", "14px")
       .style("font-weight", "bold")
-      .text("Distribution");
+      .text("Number of Patients");  // Changed label to patient count
 
     // Add legend
     const legend = svg.append("g")
@@ -132,7 +170,7 @@ function renderBMIChart() {
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .style("font-weight", "bold")
-      .text("Distribution of BMI by Heart Disease Status");
+      .text("Number of Patients by BMI and Heart Disease Status");
 
     // Add tooltip
     const tooltip = d3.select("body").append("div")
@@ -152,7 +190,7 @@ function renderBMIChart() {
         d3.select(this)
           .transition()
           .duration(200)
-          .attr("r", 6)
+          .attr("r", Math.max(6, Math.min(12, d.count * 0.8)))
           .attr("opacity", 1);
 
         tooltip.transition()
@@ -163,6 +201,9 @@ function renderBMIChart() {
           <div style="font-weight: bold; margin-bottom: 8px;">
             BMI: ${d.bmi.toFixed(1)}
           </div>
+          <div style="margin-bottom: 5px;">
+            Patients: ${d.count}
+          </div>
           <div style="color: ${color(d.status)}">
             Heart Disease: ${d.status}
           </div>
@@ -170,12 +211,12 @@ function renderBMIChart() {
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 28) + "px");
       })
-      .on("mouseout", function() {
+      .on("mouseout", function(event, d) {
         d3.select(this)
           .transition()
           .duration(200)
-          .attr("r", 4)
-          .attr("opacity", 0.6);
+          .attr("r", Math.max(3, Math.min(8, d.count * 0.8)))
+          .attr("opacity", d => d.status === "No" ? 0.5 : 0.7);
         
         tooltip.transition()
           .duration(500)
@@ -183,10 +224,3 @@ function renderBMIChart() {
       });
   });
 }
-
-// Activate on load or when clicking tab
-if (document.querySelector("#bmi-disease").classList.contains("active")) {
-  renderBMIChart();
-}
-document.querySelector("[data-target='bmi-disease']")
-  .addEventListener("click", renderBMIChart);

@@ -3,10 +3,12 @@
     height: 500px;
     margin: 20px 0;
 }
+
 .tooltip {
     z-index: 10;
     font-size: 13px;
-  }
+}
+
 .tab-content {
     display: none;
 }
@@ -14,6 +16,9 @@
 .tab-content.active {
     display: block;
 }
+
+/* Body style */
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -21,38 +26,57 @@ body {
     text-align: center;
 }
 
+/* Header style */
+
 header {
-    background: #007bff;
+    background-color: #4CAF50;
     color: white;
-    padding: 20px;
-    font-size: 24px;
+    padding: 15px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
 }
+
+/* Tab Navigation Style */
 
 .tabs {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    margin-top: 10px;
+    background-color: #333;
+    padding: 10px 0;
 }
 
 .tab {
-    padding: 10px 20px;
+    padding: 10px 10px;
+    margin: 5px;
+    background-color: #555;
+    color: white;
     cursor: pointer;
-    background: #f1f1f1;
-    border: 1px solid #ccc;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.tab:hover {
+    background-color: #777;
 }
 
 .tab.active {
-    background: #007bff;
+    background: #4CAF50;
     color: white;
 }
 
+/* Tab Content Style */
+
 .tab-content {
-    display: none;
     padding: 20px;
+    visibility: hidden;
 }
 
 .tab-content.active {
     display: block;
+    visibility: visible;
+    height: auto;
 }
 
 .chart {
@@ -78,8 +102,51 @@ svg {
     width: 1000px;
     height: 400px;
 }
+
 #chart-gender-disease {
     display: flex;
     justify-content: center;
     margin-top: 20px;
-  }
+}
+
+/* #dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+} */
+
+/* Kiểu dáng cho biểu đồ trong dashboard */
+/* #dashboard .chart {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+} */
+
+#dashboard {
+    padding: 10px;
+    overflow: hidden; 
+    gap: 10px; 
+    /* padding: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; */
+
+} 
+#dashboard .chart {
+    float: left;
+    width: calc(50% - 20px);
+    height: 350px;
+    margin: 10px;
+    box-sizing: border-box;
+}
+
+#dashboard svg {
+    width: 100%;
+    height: 300px;
+}

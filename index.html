@@ -7,13 +7,26 @@
     <title>Heart Disease Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
-   
+    <script type="module" src="constants/index.js"></script>
+    <script type="module" src="utils/index.js"></script>
+    <script type="module" src="chart/main.js"></script>
+    <script type="module" src="chart/task1.js"></script>
+    <script type="module" src="chart/task2.js"></script>
+    <script type="module" src="chart/task3.js"></script>
+    <script type="module" src="chart/task4.js"></script>
+    <script type="module" src="chart/task5.js"></script>
+    <script type="module" src="chart/task6.js"></script>
+    <script type="module" src="chart/task7.js"></script>
+    <script type="module" src="chart/task8.js"></script>
 </head>
 
 <body>
-    <header>Heart Disease Data Visualization</header>
+    <header>Final Project<br>Heart Disease Data Visualization</header>
     <div class="tabs">
-        <div class="tab active" data-target="age-distribution">Age Distribution</div>
+        <!-- Thêm tab Dashboard và đặt làm active -->
+        <div class="tab active" data-target="dashboard">Dashboard</div>
+        <!-- Các tab gốc -->
+        <div class="tab" data-target="age-distribution">Age Distribution</div>
         <div class="tab" data-target="gender-disease">Gender & Disease</div>
         <div class="tab" data-target="smoking-disease">Smoking & Disease</div>
         <div class="tab" data-target="exercise-disease">Exercise & Disease</div>
@@ -24,54 +37,57 @@
     </div>
 
     <!-- Tab Content Areas -->
-    <div id="age-distribution" class="tab-content active">
-        <h2>Age Distribution</h2>
+
+    <!-- Khu vực nội dung Dashboard mới, chứa biểu đồ task 1 và 2 -->
+    <div id="dashboard" class="tab-content active">
+   
+        <div class="chart" id="chart-age-distribution-dash"></div>
+        <div class="chart" id="chart-gender-disease-dash"></div>
+        <div class="chart" id="chart-cholesterol-disease-dash"></div>
+        <div class="chart" id="chart-bmi-disease-dash"></div>
+    </div>
+
+    <!-- Khu vực nội dung gốc (có thể để trống hoặc chứa lại biểu đồ nếu muốn) -->
+    <div id="age-distribution" class="tab-content chart">
+        <!-- Có thể để trống hoặc thêm lại <div class="chart" id="chart-age-distribution-orig"></div> nếu cần -->
         <div class="chart" id="chart-age-distribution"></div>
-        
     </div>
-
     <div id="gender-disease" class="tab-content">
-        <h2>Gender & Heart Disease</h2>
-        <div class="chart" id="chart-gender-disease"></div>
-      </div>
-      
-    <div id="smoking-disease" class="tab-content">
-        <h2>Smoking status & heart disease status occurrence</h2>
-        <div class="chart" id = "chart-smoking-disease" ></div>
+        <!-- Có thể để trống hoặc thêm lại  -->
+         <div class="chart" id="chart-gender-disease"></div>
     </div>
 
+    <div id="smoking-disease" class="tab-content">
+        <div class="chart" id="chart-smoking-disease"></div>
+    </div>
     <div id="exercise-disease" class="tab-content">
         <div class="chart" id="chart-exercise-disease"></div>
     </div>
-
+    
     <div id="cholesterol-disease" class="tab-content">
         <div class="chart" id="chart-cholesterol-disease"></div>
     </div>
-
     <div id="bmi-disease" class="tab-content">
         <div class="chart" id="chart-bmi-disease"></div>
     </div>
-
     <div id="family-history" class="tab-content">
         <div class="chart" id="chart-family-history"></div>
     </div>
-
     <div id="cholesterol-gender" class="tab-content">
         <div class="chart" id="chart-cholesterol-gender"></div>
     </div>
 
-     <!-- Main và các script riêng -->
-     <script src="./chart/main.js"></script>
-     <script src="./chart/task1.js"></script>
-     <script src="./chart/task2.js"></script>
-     <script src="./chart/task3.js"></script>
-     <script src="./chart/task4.js"></script>
-     <script src="./chart/task5.js"></script>
-     <script src="./chart/task6.js"></script>
-     <script src="./chart/task7.js"></script>
-     <script src="./chart/task8.js"></script>
+    <!-- Main và các script riêng -->
+    <script src="./chart/main.js"></script>
+    <script src="./chart/task1.js"></script>
+    <script src="./chart/task2.js"></script>
+    <script src="./chart/task3.js"></script>
+    <script src="./chart/task4.js"></script>
+    <script src="./chart/task5.js"></script>
+    <script src="./chart/task6.js"></script>
+    <script src="./chart/task7.js"></script>
+    <script src="./chart/task8.js"></script>
 
 </body>
 
 </html>
-

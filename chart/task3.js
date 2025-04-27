@@ -1,4 +1,4 @@
-function renderSmokingChart() {
+export function renderSmokingChart() {
   d3.csv("../project_heart_disease.csv").then(data => {
     const container = d3.select("#chart-smoking-disease");
     container.selectAll("svg").remove();
@@ -54,7 +54,13 @@ function renderSmokingChart() {
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
-
+      svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", -20) // nằm phía trên cùng
+      .attr("text-anchor", "middle")
+      .style("font-size", "20px")
+      .style("font-weight", "bold")
+      .text("Relationship Between Smoking Status and Heart Disease Occurrence");
     // Color scale
     const color = d3.scaleOrdinal()
       .domain(["yes", "no"])
@@ -172,11 +178,4 @@ function renderSmokingChart() {
     });
   });
 }
-
-// Activate on load or when clicking tab
-if (document.querySelector("#smoking-disease").classList.contains("active")) {
-  renderSmokingChart();
-}
-document.querySelector("[data-target='smoking-disease']")
-  .addEventListener("click", renderSmokingChart);
   

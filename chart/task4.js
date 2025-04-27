@@ -1,4 +1,4 @@
-function renderExerciseChart() {
+export function renderExerciseChart() {
   d3.csv("../project_heart_disease.csv").then(data => {
     const container = d3.select("#chart-exercise-disease");
     container.selectAll("svg").remove();
@@ -215,9 +215,9 @@ function renderExerciseChart() {
   });
 }
 
-// Activation code remains the same
-if (document.querySelector("#exercise-disease").classList.contains("active")) {
-  renderExerciseChart();
-}
-document.querySelector("[data-target='exercise-disease']")
-  .addEventListener("click", renderExerciseChart);
+// // Activation code remains the same
+// if (document.querySelector("#exercise-disease").classList.contains("active")) {
+//   renderExerciseChart();
+// }
+// document.querySelector("[data-target='exercise-disease']")
+//   .addEventListener("click", renderExerciseChart);

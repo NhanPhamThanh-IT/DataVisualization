@@ -1,8 +1,14 @@
-function renderCholesterolChart() {
+export function renderCholesterolChart(isDashboard = false) {
+  const selector = isDashboard ? "#chart-cholesterol-disease-dash" : "#chart-cholesterol-disease";
   d3.csv("../project_heart_disease.csv").then(data => {
-    const container = d3.select("#chart-cholesterol-disease");
+    const container = d3.select(selector);
     container.selectAll("svg").remove();
 
+    container.style("opacity", 0)
+      .transition()
+      .duration(1250)
+      .style("opacity", 1);
+    
     // Data preprocessing and cleaning
     const cleanData = data.filter(d => 
       d["Cholesterol Level"] && 
@@ -31,7 +37,7 @@ function renderCholesterolChart() {
     const nonDiseaseBins = histogram(nonDiseaseData);
     
     // Chart dimensions
-    const margin = { top: 40, right: 160, bottom: 120, left: 60 },
+    const margin = isDashboard ? { top: 22, right: 130, bottom: 200, left: 60 }:{ top: 40, right: 160, bottom: 120, left: 60 },
     width = 900 - margin.left - margin.right,
     height = 415 - margin.top - margin.bottom;
 
@@ -240,9 +246,9 @@ function renderCholesterolChart() {
   });
 }
 
-// Activate on load or when clicking tab
-if (document.querySelector("#cholesterol-disease").classList.contains("active")) {
-  renderCholesterolChart();
-}
-document.querySelector("[data-target='cholesterol-disease']")
-  .addEventListener("click", renderCholesterolChart);
+// // Activate on load or when clicking tab
+// if (document.querySelector("#cholesterol-disease").classList.contains("active")) {
+//   renderCholesterolChart();
+// }
+// document.querySelector("[data-target='cholesterol-disease']")
+//   .addEventListener("click", renderCholesterolChart);
