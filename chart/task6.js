@@ -103,7 +103,7 @@ export function renderBMIChart() {
       .attr("text-anchor", "middle")
       .style("font-size", "14px")
       .style("font-weight", "bold")
-      .text("Distribution");
+      .text("Count of BMI");
 
     // Add legend
     const legend = svg.append("g")
