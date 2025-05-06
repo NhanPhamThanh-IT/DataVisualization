@@ -23,9 +23,7 @@
 <body>
     <header>Final Project<br>Heart Disease Data Visualization</header>
     <div class="tabs">
-        <!-- Thêm tab Dashboard và đặt làm active -->
         <div class="tab active" data-target="dashboard">Dashboard</div>
-        <!-- Các tab gốc -->
         <div class="tab" data-target="age-distribution">Age Distribution</div>
         <div class="tab" data-target="gender-disease">Gender & Disease</div>
         <div class="tab" data-target="smoking-disease">Smoking & Disease</div>
@@ -36,9 +34,6 @@
         <div class="tab" data-target="cholesterol-gender">Cholesterol between Genders</div>
     </div>
 
-    <!-- Tab Content Areas -->
-
-    <!-- Khu vực nội dung Dashboard mới, chứa biểu đồ task 1 và 2 -->
     <div id="dashboard" class="tab-content active">
         <div id="global-controls">
             <label>
@@ -52,34 +47,20 @@
         </div>
         <div class="chart" id="chart-age-distribution-dash"></div>
         <div class="chart" id="chart-gender-disease-dash"></div>
-
         <div class="chart" id="chart-cholesterol-disease-dash"></div>
-
         <div class="chart" id="chart-bmi-disease-dash"></div>
-
-        <!-- <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div>
-                
-            </div>
-            <div>
-                
-            </div>
-        </div> -->
-
     </div>
 
-    <!-- Khu vực nội dung gốc (có thể để trống hoặc chứa lại biểu đồ nếu muốn) -->
     <div id="age-distribution" class="tab-content chart">
-        <!-- Có thể để trống hoặc thêm lại <div class="chart" id="chart-age-distribution-orig"></div> nếu cần -->
         <div class="chart" id="chart-age-distribution"></div>
     </div>
     <div id="gender-disease" class="tab-content">
-        <!-- Có thể để trống hoặc thêm lại  -->
         <div class="chart" id="chart-gender-disease"></div>
         <div class="chart" id="chart-gender-disease-groupbar"></div>
     </div>
     <div id="smoking-disease" class="tab-content">
         <div class="chart" id="chart-smoking-disease"></div>
+        <div class="chart" id="chart-smoking-gender"></div>
     </div>
     <div id="exercise-disease" class="tab-content">
         <div class="chart" id="chart-exercise-disease"></div>
@@ -99,8 +80,6 @@
         <div class="chart" id="chart-cholesterol-gender"></div>
     </div>
 
-
-    <!-- Main và các script riêng -->
     <script src="./chart/main.js"></script>
     <script src="./chart/task1.js"></script>
     <script src="./chart/task2.js"></script>
@@ -159,8 +138,31 @@
         }
     </script>
 
+    <script type="module">
+        import { renderSmokingChart, renderSmokingGenderChart } from './chart/task3.js';
+
+        function clearSmokingCharts() {
+            d3.select('#chart-smoking-disease').selectAll('*').remove();
+            d3.select('#chart-smoking-gender').selectAll('*').remove();
+        }
+
+        const smokingTab = document.querySelector('.tab[data-target="smoking-disease"]');
+        if (smokingTab) {
+            smokingTab.addEventListener('click', () => {
+                clearSmokingCharts();
+                renderSmokingChart();
+                renderSmokingGenderChart();
+            });
+        }
+
+        if (document.getElementById('smoking-disease').classList.contains('active')) {
+            clearSmokingCharts();
+            renderSmokingChart();
+            renderSmokingGenderChart();
+        }
+    </script>
+
     <script>
-        // Lắng nghe sự kiện checkbox và áp dụng cho toàn bộ biểu đồ
         document.getElementById("toggle-disease").addEventListener("change", function () {
             d3.selectAll(".bar-disease")
                 .transition()
