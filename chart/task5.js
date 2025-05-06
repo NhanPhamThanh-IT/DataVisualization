@@ -111,27 +111,31 @@ export function renderCholesterolChart(isDashboard = false) {
     svg.selectAll("rect")
       .on("mouseover", function (event, d) {
         const isDisease = d3.select(this).classed("bar-disease");
-        d3.select(this).transition().duration(200).attr("opacity", 1);
+
+        // Show the tooltip with more information
         tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip
+          .style("visibility", "visible")
+          .text(``)
+          .style("left", `${event.pageX + 10}px`)
+          .style("top", `${event.pageY - 10}px`);
         tooltip.html(`
-          <div style="font-weight: bold; margin-bottom: 8px;">
-            Cholesterol Range: ${Math.round(d.x0)} - ${Math.round(d.x1)}
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold;">Cholesterol Range</span>: ${Math.round(d.x0)} - ${Math.round(d.x1)}
           </div>
-          <div style="color: ${isDisease ? color("Disease") : color("No Disease")}">
-            ${isDisease ? "With" : "Without"} Heart Disease: ${d.length} patients
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold;">${isDisease ? "With" : "Without"} Heart Disease</span>: ${d.length} patients
+          </div>
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold;">Percentage</span>: ${((d.length / (diseaseData.length + nonDiseaseData.length)) * 100).toFixed(1)}%
           </div>
         `)
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 28) + "px");
       })
       .on("mouseout", function () {
-        d3.select(this).transition().duration(200).attr("opacity", 0.7);
+        // Hide the tooltip
         tooltip.transition().duration(500).style("opacity", 0);
-      })
-      .on("click", function (event, d) {
-        const total = diseaseData.length + nonDiseaseData.length;
-        const percent = ((d.length / total) * 100).toFixed(1);
-        alert(`Cholesterol Range: ${d.x0} - ${d.x1}\nCount: ${d.length} patients\nPercentage: ${percent}%`);
       });
 
     // Axes

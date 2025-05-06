@@ -183,19 +183,22 @@ export function renderBMIChart(isDashboard = false) {
           .duration(200)
           .style("opacity", 0.9);
 
+        tooltip.style("visibility", "visible")
+          .text(`BMI: ${d.bmi.toFixed(1)} - Patients: ${d.count} - Heart Disease: ${d.status}`)
+          .style("left", `${event.pageX + 10}px`)
+          .style("top", `${event.pageY - 10}px`);
+
         tooltip.html(`
-          <div style="font-weight: bold; margin-bottom: 8px;">
-            BMI: ${d.bmi.toFixed(1)}
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold;">BMI</span>: ${d.bmi.toFixed(1)}
           </div>
-          <div style="margin-bottom: 5px;">
-            Patients: ${d.count}
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold; margin-bottom: 8px;">Patients</span>: ${d.count}
           </div>
-          <div style="color: ${color(d.status)}">
-            Heart Disease: ${d.status}
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold; margin-bottom: 8px;">Heart Disease</span>: ${d.status}
           </div>
         `)
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 28) + "px");
       })
       .on("mouseout", function (event, d) {
         d3.select(this)
