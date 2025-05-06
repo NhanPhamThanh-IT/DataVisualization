@@ -55,6 +55,7 @@
     <div id="gender-disease" class="tab-content">
         <!-- Có thể để trống hoặc thêm lại  -->
          <div class="chart" id="chart-gender-disease"></div>
+         <div class="chart" id="chart-gender-disease-groupbar"></div>
     </div>
 
     <div id="smoking-disease" class="tab-content">
@@ -77,6 +78,7 @@
         <div class="chart" id="chart-cholesterol-gender"></div>
     </div>
 
+
     <!-- Main và các script riêng -->
     <script src="./chart/main.js"></script>
     <script src="./chart/task1.js"></script>
@@ -87,6 +89,30 @@
     <script src="./chart/task6.js"></script>
     <script src="./chart/task7.js"></script>
     <script src="./chart/task8.js"></script>
+
+    <script type="module">
+        import { renderGenderPieChart, renderGenderDiseaseGroupBarChart } from './chart/task2.js';
+      
+        function clearGenderDiseaseCharts() {
+          d3.select('#chart-gender-disease').selectAll('*').remove();
+          d3.select('#chart-gender-disease-groupbar').selectAll('*').remove();
+        }
+      
+        const genderTab = document.querySelector('.tab[data-target="gender-disease"]');
+        if (genderTab) {
+          genderTab.addEventListener('click', () => {
+            clearGenderDiseaseCharts();
+            renderGenderPieChart(false);
+            renderGenderDiseaseGroupBarChart(false);
+          });
+        }
+      
+        if (document.getElementById('gender-disease').classList.contains('active')) {
+          clearGenderDiseaseCharts();
+          renderGenderPieChart(false);
+          renderGenderDiseaseGroupBarChart(false);
+        }
+      </script>
 
 </body>
 

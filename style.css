@@ -100,15 +100,22 @@ header {
 
 svg {
     width: 1000px;
-    height: 400px;
+    height: auto;
+    max-width: 100%;
 }
 
 #chart-gender-disease {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 0px;
 }
-
+#chart-gender-disease-groupbar {
+    /* display: inline-block;
+    vertical-align: top; */
+    /* width: 48%; */
+    margin: 0%;
+    min-height: 700px; /* Increased height for larger chart */
+}
 /* #dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
