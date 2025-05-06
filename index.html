@@ -40,7 +40,7 @@
 
     <!-- Khu vực nội dung Dashboard mới, chứa biểu đồ task 1 và 2 -->
     <div id="dashboard" class="tab-content active">
-   
+
         <div class="chart" id="chart-age-distribution-dash"></div>
         <div class="chart" id="chart-gender-disease-dash"></div>
         <div class="chart" id="chart-cholesterol-disease-dash"></div>
@@ -54,8 +54,8 @@
     </div>
     <div id="gender-disease" class="tab-content">
         <!-- Có thể để trống hoặc thêm lại  -->
-         <div class="chart" id="chart-gender-disease"></div>
-         <div class="chart" id="chart-gender-disease-groupbar"></div>
+        <div class="chart" id="chart-gender-disease"></div>
+        <div class="chart" id="chart-gender-disease-groupbar"></div>
     </div>
 
     <div id="smoking-disease" class="tab-content">
@@ -64,7 +64,7 @@
     <div id="exercise-disease" class="tab-content">
         <div class="chart" id="chart-exercise-disease"></div>
     </div>
-    
+
     <div id="cholesterol-disease" class="tab-content">
         <div class="chart" id="chart-cholesterol-disease"></div>
     </div>
@@ -73,6 +73,7 @@
     </div>
     <div id="family-history" class="tab-content">
         <div class="chart" id="chart-family-history"></div>
+        <div class="chart" id="chart-family-smoking"></div>
     </div>
     <div id="cholesterol-gender" class="tab-content">
         <div class="chart" id="chart-cholesterol-gender"></div>
@@ -92,27 +93,51 @@
 
     <script type="module">
         import { renderGenderPieChart, renderGenderDiseaseGroupBarChart } from './chart/task2.js';
-      
+
         function clearGenderDiseaseCharts() {
-          d3.select('#chart-gender-disease').selectAll('*').remove();
-          d3.select('#chart-gender-disease-groupbar').selectAll('*').remove();
+            d3.select('#chart-gender-disease').selectAll('*').remove();
+            d3.select('#chart-gender-disease-groupbar').selectAll('*').remove();
         }
-      
+
         const genderTab = document.querySelector('.tab[data-target="gender-disease"]');
         if (genderTab) {
-          genderTab.addEventListener('click', () => {
+            genderTab.addEventListener('click', () => {
+                clearGenderDiseaseCharts();
+                renderGenderPieChart(false);
+                renderGenderDiseaseGroupBarChart(false);
+            });
+        }
+
+        if (document.getElementById('gender-disease').classList.contains('active')) {
             clearGenderDiseaseCharts();
             renderGenderPieChart(false);
             renderGenderDiseaseGroupBarChart(false);
-          });
         }
-      
-        if (document.getElementById('gender-disease').classList.contains('active')) {
-          clearGenderDiseaseCharts();
-          renderGenderPieChart(false);
-          renderGenderDiseaseGroupBarChart(false);
+    </script>
+
+    <script type="module">
+        import { renderFamilyHistoryChart, renderClusteredStackedChart } from './chart/task7.js';
+
+        function clearFamilyCharts() {
+            d3.select('#chart-family-history').selectAll('*').remove();
+            d3.select('#chart-family-smoking').selectAll('*').remove();
         }
-      </script>
+
+        const familyTab = document.querySelector('.tab[data-target="family-history"]');
+        if (familyTab) {
+            familyTab.addEventListener('click', () => {
+                clearFamilyCharts();
+                renderFamilyHistoryChart(false);
+                renderClusteredStackedChart(false);
+            });
+        }
+
+        if (document.getElementById('family-history').classList.contains('active')) {
+            clearFamilyCharts();
+            renderFamilyHistoryChart(false);
+            renderClusteredStackedChart(false);
+        }
+    </script>
 
 </body>
 
