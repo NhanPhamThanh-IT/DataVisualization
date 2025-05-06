@@ -8,10 +8,9 @@ export function renderCholesterolChart(isDashboard = false) {
       .transition()
       .duration(1250)
       .style("opacity", 1);
-    
-    // Data preprocessing and cleaning
-    const cleanData = data.filter(d => 
-      d["Cholesterol Level"] && 
+
+    const cleanData = data.filter(d =>
+      d["Cholesterol Level"] &&
       !isNaN(d["Cholesterol Level"]) &&
       d["Heart Disease Status"]
     ).map(d => ({
@@ -19,52 +18,41 @@ export function renderCholesterolChart(isDashboard = false) {
       status: d["Heart Disease Status"].trim()
     }));
 
-    // Calculate histogram bins for both groups
     const binWidth = 10;
     const bins = d3.range(150, 310, binWidth);
 
-    // Separate data by disease status
     const diseaseData = cleanData.filter(d => d.status === "Yes");
     const nonDiseaseData = cleanData.filter(d => d.status === "No");
 
-    // Create histogram generator
     const histogram = d3.histogram()
-    .value(d => d.cholesterol)
-    .domain([150, 300])
-    .thresholds(bins);
+      .value(d => d.cholesterol)
+      .domain([150, 300])
+      .thresholds(bins);
 
     const diseaseBins = histogram(diseaseData);
     const nonDiseaseBins = histogram(nonDiseaseData);
-    
-    // Chart dimensions
-    const margin = isDashboard ? { top: 22, right: 130, bottom: 200, left: 60 }:{ top: 40, right: 160, bottom: 120, left: 60 },
-    width = 900 - margin.left - margin.right,
-    height = 415 - margin.top - margin.bottom;
 
-    // Create SVG
+    const margin = isDashboard ? { top: 22, right: 130, bottom: 200, left: 60 } : { top: 40, right: 160, bottom: 120, left: 60 },
+      width = 900 - margin.left - margin.right,
+      height = 415 - margin.top - margin.bottom;
+
     const svg = container.append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Scales
-    const x = d3.scaleLinear()
-      .domain([150, 300])
-      .range([0, width]);
-
-      const y = d3.scaleLinear()
+    const x = d3.scaleLinear().domain([150, 300]).range([0, width]);
+    const y = d3.scaleLinear()
       .domain([0, d3.max([...diseaseBins, ...nonDiseaseBins], d => d.length)])
       .nice()
       .range([height, 0]);
 
-    // Color scale
     const color = d3.scaleOrdinal()
       .domain(["Disease", "No Disease"])
       .range(["purple", "lightblue"]);
 
-    
-    // Add disease group histogram
+    // Disease bars
     svg.selectAll(".bar-disease")
       .data(diseaseBins)
       .join("rect")
@@ -74,54 +62,41 @@ export function renderCholesterolChart(isDashboard = false) {
       .attr("width", d => x(d.x1) - x(d.x0) - 1)
       .attr("height", d => height - y(d.length))
       .attr("fill", color("Disease"))
-      .attr("opacity", 0.7)
-      .transition()
-      .duration(1000)
-      .attr("y", d => y(d.length))
-      .attr("height", d => height - y(d.length));
+      .attr("opacity", 0.7);
 
-    // Add non-disease group histogram
+    // No disease bars
     svg.selectAll(".bar-no-disease")
-    .data(nonDiseaseBins)
-    .join("rect")
-    .attr("class", "bar-no-disease")
-    .attr("x", d => x(d.x0))
-    .attr("width", d => x(d.x1) - x(d.x0) - 1)
-    .attr("y", d => y(d.length))
-    .attr("height", d => height - y(d.length))
-    .attr("fill", color("No Disease"))
-    .attr("opacity", 0.7);
+      .data(nonDiseaseBins)
+      .join("rect")
+      .attr("class", "bar-no-disease")
+      .attr("x", d => x(d.x0))
+      .attr("y", d => y(d.length))
+      .attr("width", d => x(d.x1) - x(d.x0) - 1)
+      .attr("height", d => height - y(d.length))
+      .attr("fill", color("No Disease"))
+      .attr("opacity", 0.7);
 
-
-    // Line smoothing
+    // Line paths
     const line = d3.line()
-    .x(d => x((d.x0 + d.x1) / 2))
-    .y(d => y(d.length))
-    .curve(d3.curveCatmullRom.alpha(0.5));
+      .x(d => x((d.x0 + d.x1) / 2))
+      .y(d => y(d.length))
+      .curve(d3.curveCatmullRom.alpha(0.5));
 
     svg.append("path")
       .datum(diseaseBins)
       .attr("fill", "none")
       .attr("stroke", "red")
       .attr("stroke-width", 2)
-      .attr("d", line)
-      .style("opacity", 0)
-      .transition()
-      .duration(1000)
-      .style("opacity", 1);
+      .attr("d", line);
 
-      svg.append("path")
+    svg.append("path")
       .datum(nonDiseaseBins)
       .attr("fill", "none")
       .attr("stroke", "blue")
       .attr("stroke-width", 2)
-      .attr("d", line)
-      .style("opacity", 0)
-      .transition()
-      .duration(1000)
-      .style("opacity", 1);
+      .attr("d", line);
 
-    // Add tooltip
+    // Tooltip
     const tooltip = d3.select("body").append("div")
       .attr("class", "tooltip")
       .style("opacity", 0)
@@ -133,19 +108,11 @@ export function renderCholesterolChart(isDashboard = false) {
       .style("font-size", "12px")
       .style("box-shadow", "0 4px 6px rgba(0,0,0,0.1)");
 
-    // Add interactivity
     svg.selectAll("rect")
-      .on("mouseover", function(event, d) {
+      .on("mouseover", function (event, d) {
         const isDisease = d3.select(this).classed("bar-disease");
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .attr("opacity", 1);
-
-        tooltip.transition()
-          .duration(200)
-          .style("opacity", 0.9);
-        
+        d3.select(this).transition().duration(200).attr("opacity", 1);
+        tooltip.transition().duration(200).style("opacity", 0.9);
         tooltip.html(`
           <div style="font-weight: bold; margin-bottom: 8px;">
             Cholesterol Range: ${Math.round(d.x0)} - ${Math.round(d.x1)}
@@ -157,46 +124,31 @@ export function renderCholesterolChart(isDashboard = false) {
           .style("left", (event.pageX + 10) + "px")
           .style("top", (event.pageY - 28) + "px");
       })
-      .on("mouseout", function() {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .attr("opacity", 0.7);
-        
-        tooltip.transition()
-          .duration(500)
-          .style("opacity", 0);
+      .on("mouseout", function () {
+        d3.select(this).transition().duration(200).attr("opacity", 0.7);
+        tooltip.transition().duration(500).style("opacity", 0);
+      })
+      .on("click", function (event, d) {
+        const total = diseaseData.length + nonDiseaseData.length;
+        const percent = ((d.length / total) * 100).toFixed(1);
+        alert(`Cholesterol Range: ${d.x0} - ${d.x1}\nCount: ${d.length} patients\nPercentage: ${percent}%`);
       });
 
-    // Add axes
-    // Update x-axis display
+    // Axes
     svg.append("g")
       .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x)
-        .ticks(15)
-        .tickFormat(d => `${d}`))
+      .attr("class", "x-axis")
+      .call(d3.axisBottom(x).ticks(15))
       .selectAll("text")
       .style("text-anchor", "end")
       .attr("dx", "-1.2em")
       .attr("dy", ".5em")
       .attr("transform", "rotate(-45)")
       .style("font-size", "12px");
-    
-    // Add grid lines for better readability
-    svg.append("g")
-      .attr("class", "grid")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x)
-        .ticks(15)
-        .tickSize(-height)
-        .tickFormat(""))
-      .style("stroke-dasharray", "2,2")
-      .style("opacity", 0.1);
-    
-    svg.append("g")
-      .call(d3.axisLeft(y));
 
-    // Add labels
+    svg.append("g").call(d3.axisLeft(y));
+
+    // Labels
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", height + 80)
@@ -214,28 +166,6 @@ export function renderCholesterolChart(isDashboard = false) {
       .style("font-weight", "bold")
       .text("Number of Patients");
 
-    // Add legend
-    const legend = svg.append("g")
-      .attr("transform", `translate(${width + 20}, 20)`);
-
-    ["Disease", "No Disease"].forEach((key, i) => {
-      const g = legend.append("g")
-        .attr("transform", `translate(0,${i * 20})`);
-      
-      g.append("rect")
-        .attr("width", 14)
-        .attr("height", 14)
-        .attr("fill", color(key))
-        .attr("opacity", 0.7);
-
-      g.append("text")
-        .attr("x", 20)
-        .attr("y", 12)
-        .style("font-size", "12px")
-        .text(key === "Disease" ? "With Heart Disease" : "Without Heart Disease");
-    });
-
-    // Add title
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", -margin.top / 2)
@@ -243,12 +173,21 @@ export function renderCholesterolChart(isDashboard = false) {
       .style("font-size", "16px")
       .style("font-weight", "bold")
       .text("Distribution of Cholesterol Levels by Heart Disease Status");
+
+    // Legend
+    const legend = svg.append("g").attr("transform", `translate(${width + 20}, 20)`);
+    ["Disease", "No Disease"].forEach((key, i) => {
+      const g = legend.append("g").attr("transform", `translate(0,${i * 20})`);
+      g.append("rect")
+        .attr("width", 14)
+        .attr("height", 14)
+        .attr("fill", color(key))
+        .attr("opacity", 0.7);
+      g.append("text")
+        .attr("x", 20)
+        .attr("y", 12)
+        .style("font-size", "12px")
+        .text(key === "Disease" ? "With Heart Disease" : "Without Heart Disease");
+    });
   });
 }
-
-// // Activate on load or when clicking tab
-// if (document.querySelector("#cholesterol-disease").classList.contains("active")) {
-//   renderCholesterolChart();
-// }
-// document.querySelector("[data-target='cholesterol-disease']")
-//   .addEventListener("click", renderCholesterolChart);

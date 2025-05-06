@@ -40,11 +40,32 @@
 
     <!-- Khu vực nội dung Dashboard mới, chứa biểu đồ task 1 và 2 -->
     <div id="dashboard" class="tab-content active">
-
+        <div id="global-controls">
+            <label>
+                <input type="checkbox" id="toggle-disease" checked />
+                Show Disease Group
+            </label>
+            <label>
+                <input type="checkbox" id="toggle-no-disease" checked />
+                Show Non-Disease Group
+            </label>
+        </div>
         <div class="chart" id="chart-age-distribution-dash"></div>
         <div class="chart" id="chart-gender-disease-dash"></div>
+
         <div class="chart" id="chart-cholesterol-disease-dash"></div>
+
         <div class="chart" id="chart-bmi-disease-dash"></div>
+
+        <!-- <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div> -->
+
     </div>
 
     <!-- Khu vực nội dung gốc (có thể để trống hoặc chứa lại biểu đồ nếu muốn) -->
@@ -57,7 +78,6 @@
         <div class="chart" id="chart-gender-disease"></div>
         <div class="chart" id="chart-gender-disease-groupbar"></div>
     </div>
-
     <div id="smoking-disease" class="tab-content">
         <div class="chart" id="chart-smoking-disease"></div>
     </div>
@@ -137,6 +157,24 @@
             renderFamilyHistoryChart(false);
             renderClusteredStackedChart(false);
         }
+    </script>
+
+    <script>
+        // Lắng nghe sự kiện checkbox và áp dụng cho toàn bộ biểu đồ
+        document.getElementById("toggle-disease").addEventListener("change", function () {
+            d3.selectAll(".bar-disease")
+                .transition()
+                .duration(300)
+                .style("opacity", this.checked ? 0.7 : 0);
+        });
+
+        document.getElementById("toggle-no-disease").addEventListener("change", function () {
+            d3.selectAll(".bar-no-disease")
+                .transition()
+                .duration(300)
+                .style("opacity", this.checked ? 0.5 : 0);
+        });
+
     </script>
 
 </body>
