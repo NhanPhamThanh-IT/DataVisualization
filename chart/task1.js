@@ -1,11 +1,22 @@
-export function renderAgeDistributionChart() {
+// Điều chỉnh task1.js để hỗ trợ cả dashboard và tab riêng
+export function renderAgeDistributionChart(isDashboard = false) {
+  // Xác định ID selector dựa vào tham số
+  const selector = isDashboard ? "#chart-age-distribution-dash" : "#chart-age-distribution";
+
   // Định nghĩa color ở đây để dễ chỉnh sửa
   const color = d3.scaleOrdinal()
     .domain(["yes", "no"])
     .range(["#FFB2AB", "#B2E0B1"]);
 
   d3.csv("../project_heart_disease.csv").then(data => {
-    const container = d3.select("#chart-age-distribution");
+    const container = d3.select(selector);
+
+    // Kiểm tra xem container có tồn tại không
+    if (container.empty()) {
+      console.warn(`Không tìm thấy phần tử với selector: ${selector}`);
+      return;
+    }
+
     container.selectAll("svg").remove();
 
     // Fade-in effect for the whole chart
@@ -25,6 +36,7 @@ export function renderAgeDistributionChart() {
       .value(d => d.Age);
 
     const binned = ageBins(data);
+
     const chartData = binned.map(bin => {
       const yes = bin.filter(d => d["Heart Disease Status"] === "Yes").length;
       const no = bin.filter(d => d["Heart Disease Status"] === "No").length;
@@ -35,9 +47,19 @@ export function renderAgeDistributionChart() {
       };
     });
 
-    const margin = { top: 40, right: 100, bottom: 60, left: 60 },
-      width = 800 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
+    // Điều chỉnh kích thước biểu đồ dựa vào loại hiển thị
+    const margin = isDashboard
+      ? { top: 30, right: 50, bottom: 40, left: 40 }
+      : { top: 40, right: 100, bottom: 60, left: 60 };
+
+    // Kích thước nhỏ hơn cho dashboard
+    const width = isDashboard
+      ? 400 - margin.left - margin.right
+      : 800 - margin.left - margin.right;
+
+    const height = isDashboard
+      ? 300 - margin.top - margin.bottom
+      : 400 - margin.top - margin.bottom;
 
     const x = d3.scaleBand()
       .domain(chartData.map(d => d.ageGroup))
@@ -89,12 +111,19 @@ export function renderAgeDistributionChart() {
         d3.select(this)
           .style("opacity", 0.8)
           .style("cursor", "pointer");
-
         tooltip
           .style("visibility", "visible")
           .text(`Age Group: ${d.group}, ${d.key === "yes" ? "Heart Disease" : "No Disease"}: ${d.value}`)
           .style("left", `${event.pageX + 10}px`)
           .style("top", `${event.pageY - 10}px`);
+        tooltip.html(`
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold;">Age Group</span>: ${d.group}
+          </div>
+          <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold; margin-bottom: 8px;">${d.key === "yes" ? "Heart Disease" : "No Disease"}</span>: ${d.value}
+          </div>
+        `)
       })
       .on("mousemove", function (event) {
         tooltip
@@ -112,12 +141,15 @@ export function renderAgeDistributionChart() {
       .attr("y", d => y(d.yOffset + d.value))
       .attr("height", d => height - y(d.value));
 
+    // Title font size nhỏ hơn cho dashboard
+    const titleFontSize = isDashboard ? "14px" : "16px";
+
     // Title for the chart
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", -margin.top / 2)
       .attr("text-anchor", "middle")
-      .style("font-size", "16px")
+      .style("font-size", titleFontSize)
       .style("font-weight", "bold")
       .text("Age Distribution of Heart Disease Patients");
 
@@ -125,45 +157,50 @@ export function renderAgeDistributionChart() {
     svg.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(x))
-      .style("font-size", "12px");
+      .style("font-size", isDashboard ? "10px" : "12px");
 
     svg.append("g")
       .call(d3.axisLeft(y))
-      .style("font-size", "12px");
+      .style("font-size", isDashboard ? "10px" : "12px");
 
-    // Labels
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", height + margin.bottom - 10)
-      .attr("text-anchor", "middle")
-      .style("font-size", "14px")
-      .text("Age Groups");
+    // Bỏ qua labels nếu là dashboard
+    if (!isDashboard) {
+      // Labels
+      svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom - 10)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("Age Groups");
 
-    svg.append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("x", -height / 2)
-      .attr("y", -margin.left + 15)
-      .attr("text-anchor", "middle")
-      .style("font-size", "14px")
-      .text("Number of Patients");
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -margin.left + 15)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("Number of Patients");
+    }
 
-    // Legend
+    // Legend - đơn giản hóa cho dashboard
     const legend = svg.append("g")
-      .attr("transform", `translate(${width + 10}, 0)`);
+      .attr("transform", isDashboard
+        ? `translate(${width - 20}, 0)`
+        : `translate(${width + 10}, 0)`);
 
     ["yes", "no"].forEach((status, i) => {
       const g = legend.append("g")
         .attr("transform", `translate(0,${i * 20})`);
 
       g.append("rect")
-        .attr("width", 15)
-        .attr("height", 15)
+        .attr("width", isDashboard ? 10 : 15)
+        .attr("height", isDashboard ? 10 : 15)
         .attr("fill", color(status));
 
       g.append("text")
-        .attr("x", 25)
-        .attr("y", 12)
-        .style("font-size", "12px")
+        .attr("x", isDashboard ? 15 : 25)
+        .attr("y", isDashboard ? 8 : 12)
+        .style("font-size", isDashboard ? "10px" : "12px")
         .text(status === "yes" ? "Has Heart Disease" : "No Heart Disease");
     });
   });
