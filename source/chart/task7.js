@@ -1,5 +1,7 @@
+import { CSV_FILE_PATH } from '../constants/index.js';
+
 export function renderFamilyHistoryChart() {
-    d3.csv("../project_heart_disease.csv").then(data => {
+    d3.csv(CSV_FILE_PATH).then(data => {
         // Define color variables here
         const yesColor = "#FFB2AB";
         const noColor = "#B2E0B1";
@@ -193,7 +195,7 @@ export function renderFamilyHistoryChart() {
 // renderClusteredStackedChart
 
 export function renderClusteredStackedChart() {
-    d3.csv("../project_heart_disease.csv").then(data => {
+    d3.csv(CSV_FILE_PATH).then(data => {
         const colorMap = {
             Yes: "#F4A261",  // Has heart disease
             No: "#2A9D8F"    // No heart disease

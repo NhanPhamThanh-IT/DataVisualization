@@ -1,30 +1,21 @@
-// Điều chỉnh task1.js để hỗ trợ cả dashboard và tab riêng
-export function renderAgeDistributionChart(isDashboard = false) {
-  // Xác định ID selector dựa vào tham số
-  const selector = isDashboard ? "#chart-age-distribution-dash" : "#chart-age-distribution";
+import { CSV_FILE_PATH } from '../constants/index.js';
 
-  // Định nghĩa color ở đây để dễ chỉnh sửa
+export function renderAgeDistributionChart(isDashboard = false) {
+  const selector = isDashboard ? "#chart-age-distribution-dash" : "#chart-age-distribution";
   const color = d3.scaleOrdinal()
     .domain(["yes", "no"])
     .range(["#FFB2AB", "#B2E0B1"]);
-
-  d3.csv("../project_heart_disease.csv").then(data => {
+  d3.csv(CSV_FILE_PATH).then(data => {
     const container = d3.select(selector);
-
-    // Kiểm tra xem container có tồn tại không
     if (container.empty()) {
       console.warn(`Không tìm thấy phần tử với selector: ${selector}`);
       return;
     }
-
     container.selectAll("svg").remove();
-
-    // Fade-in effect for the whole chart
     container.style("opacity", 0)
       .transition()
       .duration(1250)
       .style("opacity", 1);
-
     data.forEach(d => {
       d.Age = +d.Age;
       d["Heart Disease Status"] = d["Heart Disease Status"].trim();

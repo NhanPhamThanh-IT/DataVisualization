@@ -1,6 +1,8 @@
+import { CSV_FILE_PATH } from '../constants/index.js';
+
 export function renderBMIChart(isDashboard = false) {
   const selector = isDashboard ? "#chart-bmi-disease-dash" : "#chart-bmi-disease";
-  d3.csv("../project_heart_disease.csv").then(data => {
+  d3.csv(CSV_FILE_PATH).then(data => {
     const container = d3.select(selector);
     container.selectAll("svg").remove();
 
