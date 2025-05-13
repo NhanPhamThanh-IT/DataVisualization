@@ -23,9 +23,7 @@
 <body>
     <header>Final Project<br>Heart Disease Data Visualization</header>
     <div class="tabs">
-        <!-- Thêm tab Dashboard và đặt làm active -->
         <div class="tab active" data-target="dashboard">Dashboard</div>
-        <!-- Các tab gốc -->
         <div class="tab" data-target="age-distribution">Age Distribution</div>
         <div class="tab" data-target="gender-disease">Gender & Disease</div>
         <div class="tab" data-target="smoking-disease">Smoking & Disease</div>
@@ -36,34 +34,38 @@
         <div class="tab" data-target="cholesterol-gender">Cholesterol between Genders</div>
     </div>
 
-    <!-- Tab Content Areas -->
-
-    <!-- Khu vực nội dung Dashboard mới, chứa biểu đồ task 1 và 2 -->
     <div id="dashboard" class="tab-content active">
-        <div class="chart" id="chart-age-distribution"></div> <!-- Biểu đồ Task 1 -->
-        <div class="chart" id="chart-gender-disease"></div> <!-- Biểu đồ Task 2 -->
-        <div class="chart" id="chart-smoking-disease"></div> <!-- Biểu đồ Task 3 -->
-        <div class="chart" id="chart-exercise-disease"></div> <!-- Biểu đồ Task 4 -->
-        <div class="chart" id="chart-cholesterol-disease"></div> <!-- Biểu đồ Task 5 -->
-        <div class="chart" id="chart-bmi-disease"></div> <!-- Biểu đồ Task 6 -->
-        <div class="chart" id="chart-family-history"></div> <!-- Biểu đồ Task 7 -->
-        <div class="chart" id="chart-cholesterol-gender"></div> <!-- Biểu đồ Task 8 -->
-        <!-- Thêm CSS để sắp xếp các div.chart này nếu cần -->
+        <div id="global-controls">
+            <label>
+                <input type="checkbox" id="toggle-disease" checked />
+                Show Disease Group
+            </label>
+            <label>
+                <input type="checkbox" id="toggle-no-disease" checked />
+                Show Non-Disease Group
+            </label>
+        </div>
+        <div class="chart" id="chart-age-distribution-dash"></div>
+        <div class="chart" id="chart-gender-disease-dash"></div>
+        <div class="chart" id="chart-cholesterol-disease-dash"></div>
+        <div class="chart" id="chart-bmi-disease-dash"></div>
     </div>
 
-    <!-- Khu vực nội dung gốc (có thể để trống hoặc chứa lại biểu đồ nếu muốn) -->
-    <div id="age-distribution" class="tab-content">
-        <!-- Có thể để trống hoặc thêm lại <div class="chart" id="chart-age-distribution-orig"></div> nếu cần -->
+    <div id="age-distribution" class="tab-content chart">
+        <div class="chart" id="chart-age-distribution"></div>
     </div>
     <div id="gender-disease" class="tab-content">
-        <!-- Có thể để trống hoặc thêm lại <div class="chart" id="chart-gender-disease-orig"></div> nếu cần -->
+        <div class="chart" id="chart-gender-disease"></div>
+        <div class="chart" id="chart-gender-disease-groupbar"></div>
     </div>
     <div id="smoking-disease" class="tab-content">
         <div class="chart" id="chart-smoking-disease"></div>
+        <div class="chart" id="chart-smoking-gender"></div>
     </div>
     <div id="exercise-disease" class="tab-content">
         <div class="chart" id="chart-exercise-disease"></div>
     </div>
+
     <div id="cholesterol-disease" class="tab-content">
         <div class="chart" id="chart-cholesterol-disease"></div>
     </div>
@@ -72,12 +74,12 @@
     </div>
     <div id="family-history" class="tab-content">
         <div class="chart" id="chart-family-history"></div>
+        <div class="chart" id="chart-family-smoking"></div>
     </div>
     <div id="cholesterol-gender" class="tab-content">
         <div class="chart" id="chart-cholesterol-gender"></div>
     </div>
 
-    <!-- Main và các script riêng -->
     <script src="./chart/main.js"></script>
     <script src="./chart/task1.js"></script>
     <script src="./chart/task2.js"></script>
@@ -87,6 +89,95 @@
     <script src="./chart/task6.js"></script>
     <script src="./chart/task7.js"></script>
     <script src="./chart/task8.js"></script>
+
+    <script type="module">
+        import { renderGenderPieChart, renderGenderDiseaseGroupBarChart } from './chart/task2.js';
+
+        function clearGenderDiseaseCharts() {
+            d3.select('#chart-gender-disease').selectAll('*').remove();
+            d3.select('#chart-gender-disease-groupbar').selectAll('*').remove();
+        }
+
+        const genderTab = document.querySelector('.tab[data-target="gender-disease"]');
+        if (genderTab) {
+            genderTab.addEventListener('click', () => {
+                clearGenderDiseaseCharts();
+                renderGenderPieChart(false);
+                renderGenderDiseaseGroupBarChart(false);
+            });
+        }
+
+        if (document.getElementById('gender-disease').classList.contains('active')) {
+            clearGenderDiseaseCharts();
+            renderGenderPieChart(false);
+            renderGenderDiseaseGroupBarChart(false);
+        }
+    </script>
+
+    <script type="module">
+        import { renderFamilyHistoryChart, renderClusteredStackedChart } from './chart/task7.js';
+
+        function clearFamilyCharts() {
+            d3.select('#chart-family-history').selectAll('*').remove();
+            d3.select('#chart-family-smoking').selectAll('*').remove();
+        }
+
+        const familyTab = document.querySelector('.tab[data-target="family-history"]');
+        if (familyTab) {
+            familyTab.addEventListener('click', () => {
+                clearFamilyCharts();
+                renderFamilyHistoryChart(false);
+                renderClusteredStackedChart(false);
+            });
+        }
+
+        if (document.getElementById('family-history').classList.contains('active')) {
+            clearFamilyCharts();
+            renderFamilyHistoryChart(false);
+            renderClusteredStackedChart(false);
+        }
+    </script>
+
+    <script type="module">
+        import { renderSmokingChart, renderSmokingGenderChart } from './chart/task3.js';
+
+        function clearSmokingCharts() {
+            d3.select('#chart-smoking-disease').selectAll('*').remove();
+            d3.select('#chart-smoking-gender').selectAll('*').remove();
+        }
+
+        const smokingTab = document.querySelector('.tab[data-target="smoking-disease"]');
+        if (smokingTab) {
+            smokingTab.addEventListener('click', () => {
+                clearSmokingCharts();
+                renderSmokingChart();
+                renderSmokingGenderChart();
+            });
+        }
+
+        if (document.getElementById('smoking-disease').classList.contains('active')) {
+            clearSmokingCharts();
+            renderSmokingChart();
+            renderSmokingGenderChart();
+        }
+    </script>
+
+    <script>
+        document.getElementById("toggle-disease").addEventListener("change", function () {
+            d3.selectAll(".bar-disease")
+                .transition()
+                .duration(300)
+                .style("opacity", this.checked ? 0.7 : 0);
+        });
+
+        document.getElementById("toggle-no-disease").addEventListener("change", function () {
+            d3.selectAll(".bar-no-disease")
+                .transition()
+                .duration(300)
+                .style("opacity", this.checked ? 0.5 : 0);
+        });
+
+    </script>
 
 </body>
 
