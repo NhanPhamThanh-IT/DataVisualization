@@ -1,24 +1,22 @@
-// task2.js
+import { CSV_FILE_PATH } from '../constants/index.js';
+
 export function renderGenderPieChart(isDashboard = false) {
   const selector = isDashboard ? "#chart-gender-disease-dash" : "#chart-gender-disease";
 
-  d3.csv("../project_heart_disease.csv").then(data => {
+  d3.csv(CSV_FILE_PATH).then(data => {
     const container = d3.select(selector);
     container.selectAll("svg").remove();
 
-    // Fade-in effect
     container.style("opacity", 0)
       .transition()
       .duration(1250)
       .style("opacity", 1);
 
-    // Clean data
     data.forEach(d => {
       d.Gender = d.Gender.trim().toLowerCase();
       d["Heart Disease Status"] = d["Heart Disease Status"].trim();
     });
 
-    // Aggregate data
     const grouped = d3.rollup(
       data,
       v => v.length,
@@ -67,7 +65,6 @@ export function renderGenderPieChart(isDashboard = false) {
       .domain(["Yes", "No"])
       .range(["#dd5182", "#ffa600"]);
 
-    // Tooltip
     const tooltip = d3.select("body").append("div")
       .attr("class", "tooltip")
       .style("opacity", 0)
@@ -169,8 +166,7 @@ export function renderGenderPieChart(isDashboard = false) {
 
 export function renderGenderDiseaseGroupBarChart(isDashboard = false) {
   const selector = isDashboard ? "#chart-gender-disease-dash" : "#chart-gender-disease-groupbar";
-  d3.csv("../project_heart_disease.csv").then(data => {
-    // Clean and preprocess data
+  d3.csv(CSV_FILE_PATH).then(data => {
     data.forEach(d => {
       d.Gender = d.Gender.trim();
       d["Heart Disease Status"] = d["Heart Disease Status"].trim();
@@ -178,7 +174,6 @@ export function renderGenderDiseaseGroupBarChart(isDashboard = false) {
       d.Smoking = d.Smoking ? d.Smoking.trim() : "Unknown";
     });
 
-    // Bin ages into groups
     const ageBins = d3.range(20, 90, 10);
     function getAgeGroup(age) {
       for (let i = 0; i < ageBins.length; i++) {
@@ -187,7 +182,6 @@ export function renderGenderDiseaseGroupBarChart(isDashboard = false) {
       return "Unknown";
     }
 
-    // Prepare data for grouped bar chart
     let chartData = [];
     ["Male", "Female"].forEach(gender => {
       ["Yes", "No"].forEach(heartDisease => {

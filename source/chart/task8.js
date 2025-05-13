@@ -1,5 +1,7 @@
+import { CSV_FILE_PATH } from '../constants/index.js';
+
 export function renderCholesterolGenderChart() {
-  d3.csv("../project_heart_disease.csv").then(data => {
+  d3.csv(CSV_FILE_PATH).then(data => {
     const container = d3.select("#chart-cholesterol-gender");
     container.selectAll("svg").remove();
 

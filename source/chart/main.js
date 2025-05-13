@@ -1,4 +1,3 @@
-// Đảm bảo các hàm render có sẵn trong scope global hoặc được import nếu dùng module
 import { renderAgeDistributionChart } from './task1.js';
 import { renderGenderPieChart } from './task2.js';
 import { renderSmokingChart } from './task3.js';
@@ -8,7 +7,6 @@ import { renderBMIChart } from './task6.js';
 import { renderFamilyHistoryChart } from './task7.js';
 import { renderCholesterolGenderChart } from './task8.js';
 
-// Ánh xạ ID tab tới hàm render tương ứng
 const renderFunctions = {
   "age-distribution": typeof renderAgeDistributionChart === "function" ? renderAgeDistributionChart : null,
   "gender-disease": typeof renderGenderPieChart === "function" ? renderGenderPieChart : null,
@@ -20,29 +18,22 @@ const renderFunctions = {
   "cholesterol-gender": typeof renderCholesterolGenderChart === "function" ? renderCholesterolGenderChart : null,
 };
 
-// Hàm gọi render cho Dashboard
 function renderDashboard() {
   console.log("Rendering Dashboard...");
-  
-  // Render Age Distribution Chart cho Dashboard
   if (renderFunctions["age-distribution"]) {
     try {
-      renderAgeDistributionChart(true); // true = isDashboard
+      renderAgeDistributionChart(true);
     } catch (err) {
       console.warn(`Không thể vẽ biểu đồ Age Distribution trên Dashboard:`, err);
     }
   }
-  
-  // Tương tự cho các hàm render khác, thêm tham số để phân biệt
   if (renderFunctions["gender-disease"]) {
     try {
-      // Giả sử các hàm khác cũng đã được cập nhật để nhận tham số isDashboard
       renderGenderPieChart(true);
     } catch (err) {
       console.warn(`Không thể vẽ biểu đồ Gender & Disease trên Dashboard:`, err);
     }
   }
-  
   if (renderFunctions["smoking-disease"]) {
     try {
       renderSmokingChart(true);
@@ -50,7 +41,6 @@ function renderDashboard() {
       console.warn(`Không thể vẽ biểu đồ Smoking & Disease trên Dashboard:`, err);
     }
   }
-  
   if (renderFunctions["exercise-disease"]) {
     try {
       renderExerciseChart(true);
@@ -58,7 +48,6 @@ function renderDashboard() {
       console.warn(`Không thể vẽ biểu đồ Exercise & Disease trên Dashboard:`, err);
     }
   }
-  
   if (renderFunctions["cholesterol-disease"]) {
     try {
       renderCholesterolChart(true);
@@ -66,7 +55,6 @@ function renderDashboard() {
       console.warn(`Không thể vẽ biểu đồ Cholesterol & Disease trên Dashboard:`, err);
     }
   }
-  
   if (renderFunctions["bmi-disease"]) {
     try {
       renderBMIChart(true);
@@ -74,7 +62,6 @@ function renderDashboard() {
       console.warn(`Không thể vẽ biểu đồ BMI & Disease trên Dashboard:`, err);
     }
   }
-  
   if (renderFunctions["family-history"]) {
     try {
       renderFamilyHistoryChart(true);
@@ -82,7 +69,6 @@ function renderDashboard() {
       console.warn(`Không thể vẽ biểu đồ Family History trên Dashboard:`, err);
     }
   }
-  
   if (renderFunctions["cholesterol-gender"]) {
     try {
       renderCholesterolGenderChart(true);
@@ -92,14 +78,11 @@ function renderDashboard() {
   }
 }
 
-// Xử lý sự kiện click vào tab
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", function () {
-    // Reset trạng thái tab
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
 
-    // Kích hoạt tab mới
     this.classList.add("active");
     const target = this.dataset.target;
     const targetElement = document.getElementById(target);
@@ -107,15 +90,13 @@ document.querySelectorAll(".tab").forEach(tab => {
       targetElement.classList.add("active");
     } else {
       console.error(`Không tìm thấy phần tử nội dung cho tab: ${target}`);
-      return; // Dừng lại nếu không tìm thấy target
+      return;
     }
 
-    // Gọi hàm render tương ứng
     try {
       if (target === "dashboard") {
-        renderDashboard(); // Gọi hàm render riêng cho dashboard
+        renderDashboard();
       } else if (renderFunctions[target]) {
-        // Gọi hàm render cho tab riêng với tham số isDashboard = false
         if (target === "age-distribution") {
           renderAgeDistributionChart(false);
         } else if (target === "gender-disease") {
@@ -142,7 +123,6 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-// Render tab active ban đầu khi tải trang
 document.addEventListener('DOMContentLoaded', () => {
   const activeTab = document.querySelector('.tab.active');
   if (activeTab) {
@@ -151,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
       renderDashboard();
     } else if (renderFunctions[target]) {
       try {
-        // Sử dụng cách gọi với tham số isDashboard = false
         if (target === "age-distribution") {
           renderAgeDistributionChart(false);
         } else if (target === "gender-disease") {
@@ -174,10 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   } else {
-    // Mặc định render dashboard nếu không có tab nào active
     const dashboardTab = document.querySelector('[data-target="dashboard"]');
     if (dashboardTab) {
-      dashboardTab.click(); // Giả lập click để kích hoạt và render
+      dashboardTab.click();
     }
   }
 });

@@ -1,4 +1,4 @@
-export const CSV_FILE_PATH = "../project_heart_disease.csv";
+export const CSV_FILE_PATH = "../dataset.csv";
 
 export const TASK_7 = {
     DATA_TARGET: 'family-history',

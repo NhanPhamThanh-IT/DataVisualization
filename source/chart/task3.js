@@ -1,5 +1,7 @@
+import { CSV_FILE_PATH } from '../constants/index.js';
+
 export function renderSmokingChart() {
-  d3.csv("../project_heart_disease.csv").then(data => {
+  d3.csv(CSV_FILE_PATH).then(data => {
     const container = d3.select("#chart-smoking-disease");
     container.selectAll("svg").remove();
 
@@ -192,7 +194,7 @@ export function renderSmokingChart() {
 }
 
 export function renderSmokingGenderChart() {
-  d3.csv("../project_heart_disease.csv").then(data => {
+  d3.csv(CSV_FILE_PATH).then(data => {
     const container = d3.select("#chart-smoking-gender");
     container.selectAll("svg").remove();
 
